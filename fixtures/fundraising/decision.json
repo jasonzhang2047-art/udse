@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.5.0",
+  "decision_id": "dec_funding_001",
+  "revision": 1,
+  "question": "Should our four founders raise capital now or in 12 months?",
+  "owner_id": "user_fa",
+  "participants": [
+    {"agent_id": "founder_a", "user_id": "user_fa", "display_name": "Founder A (CEO)", "role": "founder", "profile_ref": "profile_founder_a"},
+    {"agent_id": "founder_b", "user_id": "user_fb", "display_name": "Founder B (CTO)", "role": "founder", "profile_ref": "profile_founder_b"},
+    {"agent_id": "founder_c", "user_id": "user_fc", "display_name": "Founder C", "role": "founder", "profile_ref": "profile_founder_c"},
+    {"agent_id": "founder_d", "user_id": "user_fd", "display_name": "Founder D", "role": "founder", "profile_ref": "profile_founder_d"}
+  ],
+  "participant_refs": ["founder_a", "founder_b", "founder_c", "founder_d"],
+  "alternatives": [
+    {"id": "now", "policy": "begin_fundraising_now", "label": "Raise now"},
+    {"id": "later", "policy": "defer_fundraising_12_months", "label": "Raise in 12 months"},
+    {"id": "stage", "policy": "run_pilot_then_fundraise_if_gate_met", "label": "Pilot first, raise on traction"}
+  ],
+  "horizon": {"starts_at": "2026-10-18T00:00:00-07:00", "ends_at": "2028-10-18T00:00:00-07:00", "clock_policy": "discrete_event_with_monthly_checks"},
+  "metrics": ["cash_runway_months", "customer_evidence", "founder_retention", "funded", "founder_ownership_pct"],
+  "initial_facts": [
+    {"ref": "company.cash_usd", "value": 180000, "unit": "USD", "description": "Cash in the bank (founder-provided)"},
+    {"ref": "company.monthly_outflow_usd", "value": 15000, "unit": "USD/month", "description": "Monthly outflow (founder-provided)"},
+    {"ref": "company.founder_ownership", "value": 100, "unit": "%", "description": "Founders own 100% today"},
+    {"ref": "team.fte", "value": 4, "unit": "person", "description": "Four founders full-time"},
+    {"ref": "team.founders", "value": 4, "unit": "person", "description": "Founding team size"},
+    {"ref": "pilot.monthly_cost_usd", "value": 2000, "unit": "USD/month", "description": "Incremental monthly cost of running a customer pilot"}
+  ],
+  "constraints": [
+    {"id": "cash_floor", "ref": "company.cash_usd", "min": 0, "hard": true, "description": "Cash cannot go negative"}
+  ],
+  "research_policy": {"external_web": "allowed", "private_sources": "consent_only", "allowed_adapters": ["fixture", "user_attachment"]},
+  "governance_policy": {"kind": "authorized_signatories", "signatories": ["founder_a", "founder_b"]},
+  "fidelity_request": "balanced",
+  "domain_labels": ["startup", "funding"],
+  "jurisdiction": "US-CA",
+  "risk_class": "standard",
+  "model_package_hint": "pkg.startup_financing_runway"
+}

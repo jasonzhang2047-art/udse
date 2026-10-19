@@ -1,0 +1,17 @@
+{
+  "_fixture_notice": "Synthetic garden members.",
+  "users": [
+    {"user_id": "user_g1", "display_name": "Garden member 1", "token": "dev-token-garden-1", "profile_id": "profile_garden_1",
+     "onboarding": "I care most about keeping the fund healthy.",
+     "features": [
+       {"key": "preference.budget_usd_change", "value": {"weight": 0.001, "unit": "USD"}, "status": "CONFIRMED", "epistemic_confidence": "medium", "relevance": 0.8},
+       {"key": "behavior.initiative", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3}
+     ]},
+    {"user_id": "user_g2", "display_name": "Garden member 2", "token": "dev-token-garden-2", "profile_id": "profile_garden_2",
+     "onboarding": "Lower water bills matter to me.",
+     "features": [
+       {"key": "preference.water_cost_usd_per_month_change", "value": {"weight": -0.02, "unit": "USD/month"}, "status": "CONFIRMED", "epistemic_confidence": "medium", "relevance": 0.8}
+     ]},
+    {"user_id": "user_m1", "display_name": "Patient (fixture)", "token": "dev-token-patient", "profile_id": "profile_patient", "onboarding": "fixture", "features": []}
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "0.5.0",
+  "decision_id": "dec_dinner_001",
+  "revision": 1,
+  "question": "Where should the four of us eat dinner this Saturday evening?",
+  "owner_id": "user_a",
+  "participants": [
+    {"agent_id": "agent_a", "user_id": "user_a", "display_name": "Person A", "profile_ref": "profile_user_a"},
+    {"agent_id": "agent_b", "user_id": "user_b", "display_name": "Person B", "profile_ref": "profile_user_b"},
+    {"agent_id": "agent_c", "user_id": "user_c", "display_name": "Person C", "profile_ref": "profile_user_c"},
+    {"agent_id": "agent_d", "user_id": "user_d", "display_name": "Person D", "profile_ref": "profile_user_d"}
+  ],
+  "participant_refs": ["agent_a", "agent_b", "agent_c", "agent_d"],
+  "alternatives": [
+    {"id": "deliberate", "policy": "choose_together_decide_by_1845", "label": "Choose together (decide by 18:45)"},
+    {"id": "deliberate_early", "policy": "choose_together_decide_by_1800", "label": "Choose together (decide by 18:00)"},
+    {"id": "defer", "policy": "defer", "label": "Skip going out"}
+  ],
+  "horizon": {"starts_at": "2026-10-24T17:00:00-07:00", "ends_at": "2026-10-24T22:00:00-07:00", "clock_policy": "discrete_event_minute", "timezone": "America/Los_Angeles"},
+  "metrics": ["decision_reached", "dietary_constraints_verified", "spend_usd", "arrival_at", "seating_wait_min"],
+  "initial_facts": [
+    {"ref": "group.budget_usd", "value": 240, "unit": "USD", "description": "Total budget the group agreed on"},
+    {"ref": "group.decision_deadline", "value": "2026-10-24T18:45:00-07:00", "type": "timestamp", "description": "If nothing is agreed by 18:45 we eat at home"},
+    {"ref": "group.candidates", "value": "R-A, R-B, R-C", "type": "text", "description": "Hypothetical candidate venues (fixture)"}
+  ],
+  "constraints": [
+    {"id": "group_budget", "ref": "group.spend_usd", "max": 240, "hard": true, "description": "Group spend must stay within $240"}
+  ],
+  "research_policy": {"external_web": "allowed", "private_sources": "consent_only", "allowed_adapters": ["fixture", "user_attachment"]},
+  "governance_policy": {"kind": "unanimous"},
+  "fidelity_request": "balanced",
+  "privacy_policy_ref": "priv_fixture",
+  "budget_profile_id": "balanced_v1",
+  "domain_labels": ["dining", "group_choice"],
+  "jurisdiction": "US-CA",
+  "risk_class": "standard",
+  "model_package_hint": "pkg.group_venue_choice"
+}

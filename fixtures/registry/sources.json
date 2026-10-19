@@ -1,0 +1,20 @@
+{
+  "_fixture_notice": "Synthetic reference sources for registry seeding.",
+  "documents": [
+    {"source_id": "src_accounting_identity", "kind": "official_rule", "uri": "https://standards.example.invalid/accounting/cash-identity",
+     "retrieved_at": "2026-10-01T00:00:00+00:00", "observed_at": "2026-10-01T00:00:00+00:00", "jurisdiction": "*",
+     "topics": ["accounting.recurring_outflow"],
+     "content": "Cash balance at end of period = opening balance + inflows - outflows (definitional accounting identity).",
+     "claims": [{"claim_id": "claim_accounting_identity", "subject": "accounting", "predicate": "cash_identity", "object": "closing = opening + inflows - outflows"}]},
+    {"source_id": "src_dilution_math", "kind": "official_rule", "uri": "https://standards.example.invalid/finance/dilution",
+     "retrieved_at": "2026-10-01T00:00:00+00:00", "observed_at": "2026-10-01T00:00:00+00:00", "jurisdiction": "*",
+     "topics": ["finance.dilution_math"],
+     "content": "Post-money ownership of existing holders = pre-money / (pre-money + new investment) (arithmetic identity given terms).",
+     "claims": [{"claim_id": "claim_dilution_identity", "subject": "finance", "predicate": "dilution_identity", "object": "owner_after = owner_before * pre / (pre + investment)"}]},
+    {"source_id": "src_de_franchise", "kind": "official_rule", "uri": "https://state.example.invalid/us-de/franchise-tax-fixture",
+     "retrieved_at": "2026-10-01T00:00:00+00:00", "observed_at": "2026-10-01T00:00:00+00:00", "jurisdiction": "US-DE",
+     "topics": ["us_de.annual_franchise_tax"],
+     "content": "Fixture: a jurisdiction-specific annual corporate fee schedule (illustrative values only).",
+     "claims": [{"claim_id": "claim_de_franchise", "subject": "us_de", "predicate": "annual_franchise_fee_rule", "object": "fixture schedule"}]}
+  ]
+}

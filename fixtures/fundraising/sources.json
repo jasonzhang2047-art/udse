@@ -1,0 +1,34 @@
+{
+  "_fixture_notice": "SYNTHETIC FIXTURE DATA. No real team, investor, valuation or 2027 market condition is asserted. Historical figures are invented reference values for testing.",
+  "documents": [
+    {"source_id": "src_seed_dataset_2025", "kind": "dataset", "uri": "https://data.example.invalid/seed-rounds/2025-summary.csv",
+     "retrieved_at": "2026-10-15T00:00:00-07:00", "observed_at": "2026-01-31T00:00:00-07:00", "jurisdiction": "US",
+     "topics": ["funding.reference"],
+     "content": "Fixture dataset: comparable seed rounds closed in 2025, sector=B2B software, region=US. Median pre-money 6.0M USD; median months from first meeting to close 4.",
+     "claims": [
+       {"claim_id": "claim_seed_premoney_2025", "subject": "seed_market_2025", "predicate": "median_pre_money_usd", "object": 6000000, "unit": "USD", "claim_valid_at": "2025", "record_type": "observation"},
+       {"claim_id": "claim_seed_time_to_close_2025", "subject": "seed_market_2025", "predicate": "median_months_to_close", "object": 4, "unit": "month", "claim_valid_at": "2025"}
+     ]},
+    {"source_id": "src_vc_blog", "kind": "third_party_summary", "uri": "https://blog.example.invalid/vc-is-recovering",
+     "retrieved_at": "2026-10-15T00:00:00-07:00", "observed_at": "2026-09-01T00:00:00-07:00", "jurisdiction": "US",
+     "topics": ["funding.climate_2027"],
+     "content": "Blog (fixture): 'VC is recovering and 2027 will be a great year to raise.'",
+     "claims": [
+       {"claim_id": "claim_vc_blog_recovering", "subject": "vc_market", "predicate": "climate_2027", "object": "recovering"}
+     ]},
+    {"source_id": "src_eu_grant_rules", "kind": "official_rule", "uri": "https://grants.example.invalid/eu/innovation-grant-rules",
+     "retrieved_at": "2026-10-15T00:00:00-07:00", "observed_at": "2026-10-15T00:00:00-07:00", "jurisdiction": "EU",
+     "topics": ["funding.grant_rules"],
+     "content": "Fixture: EU innovation grant eligibility (only for EU-registered companies).",
+     "claims": [
+       {"claim_id": "claim_eu_grant_cap", "subject": "innovation_grant", "predicate": "max_award_usd", "object": 250000, "unit": "USD"}
+     ]},
+    {"source_id": "src_runway_retention_study", "kind": "research_paper", "uri": "https://papers.example.invalid/founder-runway-retention",
+     "retrieved_at": "2026-11-15T00:00:00-08:00", "observed_at": "2026-11-15T00:00:00-08:00", "jurisdiction": "US",
+     "topics": ["founder_retention", "study_runway_retention"],
+     "content": "Fixture study (published after the first model was built): across sampled early-stage teams, co-founder departures concentrated when runway fell below about 3 months.",
+     "claims": [
+       {"claim_id": "claim_runway_retention_effect", "subject": "study_runway_retention", "predicate": "founder_runway_effect", "object": "departure risk concentrates below ~3 months runway", "record_type": "analyst_model"}
+     ]}
+  ]
+}

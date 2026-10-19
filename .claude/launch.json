@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "udse",
+      "runtimeExecutable": "/Users/wellclaw/Documents/weller_claude0.5/.venv/bin/python",
+      "runtimeArgs": ["-m", "udse.cli", "serve", "--port", "8765", "--db", "var/demo.sqlite3"],
+      "port": 8765
+    }
+  ]
+}

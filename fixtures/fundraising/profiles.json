@@ -1,0 +1,41 @@
+{
+  "_fixture_notice": "Synthetic founders. Features are illustrative onboarding statements, not real people.",
+  "users": [
+    {"user_id": "user_fa", "display_name": "Founder A (CEO)", "token": "dev-token-founder-a", "profile_id": "profile_founder_a",
+     "onboarding": "I watch runway closely and would rather raise early than run out. I'll cut costs if we get under six months.",
+     "features": [
+       {"key": "preference.runway_shortfall_months", "value": {"weight": 0.5, "unit": "month"}, "status": "CONFIRMED", "epistemic_confidence": "high", "relevance": 0.9},
+       {"key": "preference.runway_months_after", "value": {"weight": 0.3, "unit": "month"}, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.8},
+       {"key": "preference.ownership_loss_pct", "value": {"weight": -0.05, "unit": "%"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.5},
+       {"key": "preference.evidence_gap_customers", "value": {"weight": 0.4, "unit": "customer"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.5},
+       {"key": "behavior.compromise_tolerance", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.initiative", "value": 0.8, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.4}
+     ]},
+    {"user_id": "user_fb", "display_name": "Founder B (CTO)", "token": "dev-token-founder-b", "profile_id": "profile_founder_b",
+     "onboarding": "Ownership and control matter a lot to me; I want strong customer evidence before giving away equity.",
+     "features": [
+       {"key": "preference.ownership_loss_pct", "value": {"weight": -0.08, "unit": "%"}, "status": "CONFIRMED", "epistemic_confidence": "high", "relevance": 0.9},
+       {"key": "preference.runway_months_after", "value": {"weight": 0.2, "unit": "month"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.6},
+       {"key": "preference.evidence_gap_customers", "value": {"weight": 0.3, "unit": "customer"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.5},
+       {"key": "behavior.compromise_tolerance", "value": 0.4, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.initiative", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3}
+     ]},
+    {"user_id": "user_fc", "display_name": "Founder C", "token": "dev-token-founder-c", "profile_id": "profile_founder_c",
+     "onboarding": "I mostly care that we don't run out of money.",
+     "features": [
+       {"key": "preference.runway_months_after", "value": {"weight": 0.4, "unit": "month"}, "status": "CONFIRMED", "epistemic_confidence": "medium", "relevance": 0.8},
+       {"key": "preference.ownership_loss_pct", "value": {"weight": -0.02, "unit": "%"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3},
+       {"key": "behavior.compromise_tolerance", "value": 0.6, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.initiative", "value": 0.3, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3}
+     ]},
+    {"user_id": "user_fd", "display_name": "Founder D", "token": "dev-token-founder-d", "profile_id": "profile_founder_d",
+     "onboarding": "I won't stay full-time without about six months of company runway.",
+     "features": [
+       {"key": "preference.runway_shortfall_months", "value": {"weight": 0.6, "unit": "month"}, "status": "CONFIRMED", "epistemic_confidence": "high", "relevance": 0.9, "note": "self-stated contextual boundary"},
+       {"key": "preference.runway_months_after", "value": {"weight": 0.3, "unit": "month"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.6},
+       {"key": "behavior.compromise_tolerance", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.initiative", "value": 0.2, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.2},
+       {"key": "behavior.deadline_sensitivity", "value": null, "status": "UNKNOWN", "epistemic_confidence": "unknown", "relevance": 0.2}
+     ]}
+  ]
+}

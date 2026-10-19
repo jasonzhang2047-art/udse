@@ -1,0 +1,19 @@
+{
+  "schema_version": "0.5.0",
+  "decision_id": "dec_medical_001",
+  "revision": 1,
+  "question": "Should I start the new medication treatment now or wait for more test results?",
+  "owner_id": "user_m1",
+  "participants": [{"agent_id": "patient", "user_id": "user_m1", "display_name": "Me"}],
+  "alternatives": [
+    {"id": "start_now", "policy": "start_treatment_now", "label": "Start now",
+     "assumptions": [{"ref": "patient.out_of_pocket_usd", "delta": 400, "unit": "USD", "description": "Co-pay"}]},
+    {"id": "wait_for_tests", "policy": "wait_for_results", "label": "Wait for results"}
+  ],
+  "horizon": {"starts_at": "2026-11-01T00:00:00-07:00", "ends_at": "2027-05-01T00:00:00-07:00"},
+  "metrics": ["symptom_severity", "out_of_pocket_usd"],
+  "initial_facts": [
+    {"ref": "patient.out_of_pocket_usd", "value": 0, "unit": "USD", "description": "Spent so far"}
+  ],
+  "research_policy": {"external_web": "denied", "private_sources": "consent_only"}
+}

@@ -1,0 +1,1514 @@
+{
+  "purpose": "Explore how four founders' runway, product milestones, customer evidence and named investor-process cases may evolve from October 2026 to October 2028 under raise-now, defer-12-months and pilot-first policies (synthetic fixture).",
+  "decision_criteria": [
+    "cash_runway_months",
+    "customer_evidence",
+    "funded",
+    "founder_ownership_pct",
+    "founder_retention"
+  ],
+  "odd": {
+    "purpose": "Compare fundraising timing policies by their causal paths, not a single 'best plan' score.",
+    "entities_state_scales": "Company, team, product, pilot, fundraising process and an exogenous financing climate; monthly resolution over 24 months.",
+    "process_overview_scheduling": "Monthly cash burn, product progress and pilot signals; a monthly investor-process state machine; quarterly founder reviews plus wakeups on runway alerts and term sheets.",
+    "initialization": "User-asserted cash, burn and team capacity; 2025 historical reference values for terms (not a 2027 forecast).",
+    "inputs": "Fixture evidence bundle; exploratory productivity and demand ranges; named climate cases without probabilities.",
+    "submodels": "cash_burn (Layer A identity), product_development, pilot_signals, traction_gate, investor_process, offer governance, dilution (Layer A arithmetic), runway alerts.",
+    "evaluation_rationale": "Cash is never clipped; funding arrives only through an explicit investor-process transition plus authorised acceptance."
+  },
+  "scope": {
+    "time_resolution": "month",
+    "domain_labels": [
+      "startup",
+      "funding"
+    ]
+  },
+  "entities": [
+    {
+      "id": "company",
+      "type": "organization"
+    },
+    {
+      "id": "team",
+      "type": "group"
+    },
+    {
+      "id": "product",
+      "type": "artifact"
+    },
+    {
+      "id": "pilot",
+      "type": "process"
+    },
+    {
+      "id": "fundraising",
+      "type": "process"
+    },
+    {
+      "id": "market",
+      "type": "environment"
+    },
+    {
+      "id": "decision",
+      "type": "decision_context"
+    }
+  ],
+  "state": [
+    {
+      "ref": "company.cash_usd",
+      "type": "quantity",
+      "unit": "USD",
+      "label": "Cash",
+      "initial_value": {
+        "$fact": "company.cash_usd"
+      }
+    },
+    {
+      "ref": "company.monthly_outflow_usd",
+      "type": "quantity",
+      "unit": "USD/month",
+      "label": "Monthly outflow",
+      "initial_value": {
+        "$fact": "company.monthly_outflow_usd"
+      }
+    },
+    {
+      "ref": "company.burn_cuts",
+      "type": "quantity",
+      "unit": "count",
+      "label": "Burn cuts made",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "company.founder_ownership",
+      "type": "quantity",
+      "unit": "%",
+      "label": "Founders' ownership",
+      "initial_value": {
+        "$fact": "company.founder_ownership"
+      }
+    },
+    {
+      "ref": "team.fte",
+      "type": "quantity",
+      "unit": "person",
+      "label": "Founder capacity (FTE)",
+      "initial_value": {
+        "$fact": "team.fte"
+      }
+    },
+    {
+      "ref": "team.founders",
+      "type": "quantity",
+      "unit": "person",
+      "label": "Founders on the team",
+      "initial_value": {
+        "$fact": "team.founders"
+      }
+    },
+    {
+      "ref": "team.d_part_time",
+      "type": "boolean",
+      "label": "Founder D part-time",
+      "initial_value": false,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "product.progress",
+      "type": "quantity",
+      "unit": "point",
+      "label": "Prototype progress",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "product.ready",
+      "type": "boolean",
+      "label": "Prototype ready",
+      "initial_value": false,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "pilot.active",
+      "type": "boolean",
+      "label": "Customer pilot running",
+      "initial_value": false,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "pilot.signals",
+      "type": "quantity",
+      "unit": "customer",
+      "label": "Positive customer signals (simulated)",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "pilot.traction_met",
+      "type": "boolean",
+      "label": "Pilot traction gate met",
+      "initial_value": false,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.stage",
+      "type": "enum",
+      "values": [
+        "none",
+        "preparing",
+        "contacting",
+        "diligence",
+        "term_sheet",
+        "closed",
+        "no_offer",
+        "declined"
+      ],
+      "label": "Fundraising stage",
+      "initial_value": "none",
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.months_in_process",
+      "type": "quantity",
+      "unit": "month",
+      "label": "Months in investor process",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.attempts",
+      "type": "quantity",
+      "unit": "count",
+      "label": "Fundraising attempts",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.offer_usd",
+      "type": "quantity",
+      "unit": "USD",
+      "label": "Offered investment (hypothetical)",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.offer_pre_money_usd",
+      "type": "quantity",
+      "unit": "USD",
+      "label": "Offered pre-money (assumed terms)",
+      "initial_value": 0,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.ledger",
+      "type": "ledger",
+      "label": "Offer deliberation",
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "fundraising.decision",
+      "type": "enum",
+      "values": [
+        "accept",
+        "decline"
+      ],
+      "label": "Offer decision (simulated)",
+      "initial_value": "UNKNOWN",
+      "allow_unknown": true,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    },
+    {
+      "ref": "market.climate",
+      "type": "enum",
+      "values": [
+        "tight",
+        "baseline",
+        "favorable"
+      ],
+      "label": "Financing climate (named scenario)",
+      "initial_value": "baseline",
+      "origin": "MODEL_HYPOTHESIS",
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "description": "Named conditional case; the future market cannot be observed."
+    },
+    {
+      "ref": "decision.policy",
+      "type": "enum",
+      "values": [
+        "now",
+        "later",
+        "stage"
+      ],
+      "label": "Policy in force",
+      "initial_value": "UNKNOWN",
+      "allow_unknown": true,
+      "origin": "DERIVED_CALCULATION",
+      "epistemic_tier": "A_GROUNDED"
+    }
+  ],
+  "parameters": [
+    {
+      "id": "effort_productivity",
+      "unit": "point/person/month",
+      "value": 0.5,
+      "range": [
+        0.3,
+        0.8
+      ],
+      "source_kind": "declared_exploratory_range",
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "description": "Prototype progress per founder-FTE month; uncalibrated (no project history supplied)."
+    },
+    {
+      "id": "prototype_points",
+      "unit": "point",
+      "value": 6,
+      "source_kind": "approved_analyst_assumption",
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "description": "Scope of the prototype milestone as estimated by the founders."
+    },
+    {
+      "id": "pilot_response",
+      "type": "distribution",
+      "source_kind": "declared_exploratory_range",
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "description": "Monthly chance of a positive customer signal during the pilot; hypothetical, no sales data provided.",
+      "distribution": {
+        "kind": "bernoulli",
+        "p": 0.35
+      },
+      "scenario_values": {
+        "demand_weak": {
+          "kind": "bernoulli",
+          "p": 0.12
+        },
+        "demand_strong": {
+          "kind": "bernoulli",
+          "p": 0.6
+        }
+      }
+    },
+    {
+      "id": "traction_threshold",
+      "unit": "customer",
+      "value": 3,
+      "source_kind": "approved_analyst_assumption",
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "description": "Signals the team treats as pilot traction."
+    },
+    {
+      "id": "pilot_monthly_cost",
+      "unit": "USD/month",
+      "value": {
+        "$fact": "pilot.monthly_cost_usd"
+      },
+      "source_kind": "user_asserted",
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "reference_pre_money_usd",
+      "unit": "USD",
+      "value": {
+        "$claim": "seed_market_2025.median_pre_money_usd",
+        "kind": "FORECAST_INPUT",
+        "why": "historical reference for named term cases (not a 2027 forecast)",
+        "max_tier": "B_ASSUMPTION_BOUND"
+      },
+      "source_kind": "dataset",
+      "description": "2025 historical reference only; applying it to 2027 terms is an assumption."
+    },
+    {
+      "id": "reference_months_to_close",
+      "unit": "month",
+      "value": {
+        "$claim": "seed_market_2025.median_months_to_close",
+        "kind": "FORECAST_INPUT",
+        "max_tier": "B_ASSUMPTION_BOUND"
+      },
+      "source_kind": "dataset"
+    },
+    {
+      "id": "round_size_usd",
+      "unit": "USD",
+      "value": 1500000,
+      "source_kind": "approved_analyst_assumption",
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "description": "Assumed round size used only inside the 'offer' case."
+    },
+    {
+      "id": "max_contact_months",
+      "unit": "month",
+      "value": 6,
+      "source_kind": "approved_analyst_assumption",
+      "epistemic_tier": "C_ILLUSTRATIVE"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "climate_tight",
+      "label": "Tighter financing climate (named case)",
+      "kind": "external_condition",
+      "state_overrides": {
+        "market.climate": "tight"
+      },
+      "assumptions": [
+        "investors require stronger evidence and diligence is slower"
+      ]
+    },
+    {
+      "id": "climate_favorable",
+      "label": "More favorable climate (named case)",
+      "kind": "external_condition",
+      "state_overrides": {
+        "market.climate": "favorable"
+      },
+      "assumptions": [
+        "investors engage on a prototype alone; faster diligence"
+      ]
+    },
+    {
+      "id": "climate_tightens_2027_10",
+      "label": "Climate tightens in October 2027 (named case)",
+      "kind": "external_condition",
+      "exogenous_events": [
+        {
+          "at": "+P12M",
+          "event_type": "financing_climate_shift",
+          "description": "Financing environment scenario changes to 'tight' (assumption, not forecast).",
+          "effects": [
+            {
+              "op": "set",
+              "ref": "market.climate",
+              "value": "'tight'"
+            }
+          ]
+        }
+      ],
+      "assumptions": [
+        "climate shift at month 12"
+      ]
+    },
+    {
+      "id": "demand_weak",
+      "label": "Weak pilot response (exploratory)",
+      "kind": "external_condition",
+      "assumptions": [
+        "12% monthly signal chance"
+      ]
+    },
+    {
+      "id": "demand_strong",
+      "label": "Strong pilot response (exploratory)",
+      "kind": "external_condition",
+      "assumptions": [
+        "60% monthly signal chance"
+      ]
+    },
+    {
+      "id": "founder_time_shift",
+      "label": "One founder shifts to part-time in July 2027",
+      "kind": "external_condition",
+      "exogenous_events": [
+        {
+          "at": "2027-07-18T00:00:00-07:00",
+          "event_type": "founder_availability_change",
+          "description": "Founder D's availability drops (personal circumstances; hypothetical).",
+          "effects": [
+            {
+              "op": "set",
+              "ref": "team.d_part_time",
+              "value": "true",
+              "when": "not team.d_part_time"
+            },
+            {
+              "op": "dec",
+              "ref": "team.fte",
+              "by": "0.5[person]",
+              "when": "team.fte > 3.5[person]"
+            }
+          ]
+        }
+      ],
+      "assumptions": [
+        "capacity reduced by 0.5 FTE from 2027-07"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "id": "now",
+      "label": "Raise now",
+      "alternative_ref": "now",
+      "initial_effects": [
+        {
+          "op": "set",
+          "ref": "decision.policy",
+          "value": "'now'"
+        },
+        {
+          "op": "set",
+          "ref": "fundraising.stage",
+          "value": "'preparing'"
+        },
+        {
+          "op": "inc",
+          "ref": "fundraising.attempts",
+          "by": "1[count]"
+        }
+      ]
+    },
+    {
+      "id": "later",
+      "label": "Defer fundraising 12 months",
+      "alternative_ref": "later",
+      "initial_effects": [
+        {
+          "op": "set",
+          "ref": "decision.policy",
+          "value": "'later'"
+        }
+      ],
+      "scheduled_effects": [
+        {
+          "at": "+P12M",
+          "event_type": "deferred_fundraise_start",
+          "description": "Deferred fundraising begins (policy).",
+          "effects": [
+            {
+              "op": "set",
+              "ref": "fundraising.stage",
+              "value": "'preparing'",
+              "when": "fundraising.stage == 'none'"
+            },
+            {
+              "op": "inc",
+              "ref": "fundraising.attempts",
+              "by": "1[count]",
+              "when": "fundraising.stage == 'preparing'"
+            }
+          ]
+        }
+      ],
+      "action_windows": [
+        {
+          "action": "restart_fundraising",
+          "available_from": "+P12M"
+        },
+        {
+          "action": "start_pilot",
+          "available_from": "+P12M"
+        }
+      ]
+    },
+    {
+      "id": "stage",
+      "label": "Pilot first, raise if traction gate met",
+      "alternative_ref": "stage",
+      "initial_effects": [
+        {
+          "op": "set",
+          "ref": "decision.policy",
+          "value": "'stage'"
+        },
+        {
+          "op": "set",
+          "ref": "pilot.active",
+          "value": "true"
+        },
+        {
+          "op": "inc",
+          "ref": "company.monthly_outflow_usd",
+          "by": "param.pilot_monthly_cost"
+        }
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "id": "founder_a",
+      "display_name": "Founder A (CEO)",
+      "role": "founder",
+      "profile_ref": "profile_founder_a",
+      "periodic_review": "P3M",
+      "max_wakeups": 30
+    },
+    {
+      "id": "founder_b",
+      "display_name": "Founder B (CTO)",
+      "role": "founder",
+      "profile_ref": "profile_founder_b",
+      "periodic_review": "P3M",
+      "max_wakeups": 30
+    },
+    {
+      "id": "founder_c",
+      "display_name": "Founder C",
+      "role": "founder",
+      "profile_ref": "profile_founder_c",
+      "periodic_review": "P3M",
+      "max_wakeups": 30
+    },
+    {
+      "id": "founder_d",
+      "display_name": "Founder D",
+      "role": "founder",
+      "profile_ref": "profile_founder_d",
+      "periodic_review": "P3M",
+      "max_wakeups": 30
+    }
+  ],
+  "actions": [
+    {
+      "id": "cut_burn",
+      "description": "Cut monthly outflow by 20%.",
+      "actors": [
+        "founder_a"
+      ],
+      "preconditions": [
+        {
+          "id": "cuts_left",
+          "expr": "company.burn_cuts < 2[count]",
+          "rejection_code": "NO_MORE_CUTS"
+        }
+      ],
+      "effects": [
+        {
+          "op": "set",
+          "ref": "company.monthly_outflow_usd",
+          "value": "company.monthly_outflow_usd * 0.8"
+        },
+        {
+          "op": "inc",
+          "ref": "company.burn_cuts",
+          "by": "1[count]"
+        }
+      ],
+      "appraisal": {
+        "runway_shortfall_months": "max(6[month] - to(company.cash_usd / company.monthly_outflow_usd, 'month'), 0[month])"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "reduce_commitment",
+      "description": "Go part-time to secure personal income (founder capacity -0.5 FTE).",
+      "actors": [
+        "founder_d"
+      ],
+      "preconditions": [
+        {
+          "id": "still_full_time",
+          "expr": "not team.d_part_time",
+          "rejection_code": "ALREADY_PART_TIME"
+        }
+      ],
+      "effects": [
+        {
+          "op": "set",
+          "ref": "team.d_part_time",
+          "value": "true"
+        },
+        {
+          "op": "dec",
+          "ref": "team.fte",
+          "by": "0.5[person]"
+        }
+      ],
+      "appraisal": {
+        "runway_shortfall_months": "max(6[month] - to(company.cash_usd / company.monthly_outflow_usd, 'month'), 0[month])"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "start_pilot",
+      "description": "Start a paid customer pilot.",
+      "actors": [
+        "founder_a",
+        "founder_b"
+      ],
+      "preconditions": [
+        {
+          "id": "not_running",
+          "expr": "not pilot.active",
+          "rejection_code": "PILOT_RUNNING"
+        },
+        {
+          "id": "product_ready",
+          "expr": "product.ready",
+          "rejection_code": "NO_PROTOTYPE"
+        }
+      ],
+      "effects": [
+        {
+          "op": "set",
+          "ref": "pilot.active",
+          "value": "true"
+        },
+        {
+          "op": "inc",
+          "ref": "company.monthly_outflow_usd",
+          "by": "param.pilot_monthly_cost"
+        }
+      ],
+      "appraisal": {
+        "evidence_gap_customers": "max(3[customer] - pilot.signals, 0[customer])",
+        "runway_months_now": "to(company.cash_usd / company.monthly_outflow_usd, 'month')"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "restart_fundraising",
+      "description": "Start (or restart) an investor process.",
+      "actors": [
+        "founder_a"
+      ],
+      "preconditions": [
+        {
+          "id": "not_in_process",
+          "expr": "fundraising.stage == 'none' or fundraising.stage == 'no_offer' or fundraising.stage == 'declined'",
+          "rejection_code": "PROCESS_RUNNING"
+        },
+        {
+          "id": "attempts_left",
+          "expr": "fundraising.attempts < 2[count]",
+          "rejection_code": "NO_MORE_ATTEMPTS"
+        }
+      ],
+      "effects": [
+        {
+          "op": "set",
+          "ref": "fundraising.stage",
+          "value": "'preparing'"
+        },
+        {
+          "op": "set",
+          "ref": "fundraising.months_in_process",
+          "value": "0[month]"
+        },
+        {
+          "op": "inc",
+          "ref": "fundraising.attempts",
+          "by": "1[count]"
+        }
+      ],
+      "appraisal": {
+        "runway_shortfall_months": "max(9[month] - to(company.cash_usd / company.monthly_outflow_usd, 'month'), 0[month])",
+        "customer_evidence": "pilot.signals"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "propose_offer_decision",
+      "description": "Propose accepting or declining the term sheet.",
+      "actors": [
+        "*"
+      ],
+      "args": [
+        {
+          "name": "choice",
+          "type": "enum",
+          "values": [
+            "accept",
+            "decline"
+          ]
+        }
+      ],
+      "preconditions": [
+        {
+          "id": "term_sheet_open",
+          "expr": "fundraising.stage == 'term_sheet'",
+          "rejection_code": "NO_TERM_SHEET"
+        }
+      ],
+      "governance": {
+        "mechanism": "offer_decision",
+        "act": "propose",
+        "option_arg": "choice"
+      },
+      "appraisal": {
+        "runway_months_after": "to((company.cash_usd + if(arg.choice == 'accept', fundraising.offer_usd, 0[USD])) / company.monthly_outflow_usd, 'month')",
+        "ownership_loss_pct": "if(arg.choice == 'accept', company.founder_ownership - company.founder_ownership * fundraising.offer_pre_money_usd / (fundraising.offer_pre_money_usd + fundraising.offer_usd), 0[%])",
+        "founder_control_retained": "if(arg.choice == 'accept', company.founder_ownership * fundraising.offer_pre_money_usd / (fundraising.offer_pre_money_usd + fundraising.offer_usd) >= 50[%], true)"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND"
+    },
+    {
+      "id": "endorse_offer_decision",
+      "description": "Endorse the open proposal on the term sheet.",
+      "actors": [
+        "*"
+      ],
+      "preconditions": [
+        {
+          "id": "term_sheet_open",
+          "expr": "fundraising.stage == 'term_sheet'",
+          "rejection_code": "NO_TERM_SHEET"
+        }
+      ],
+      "governance": {
+        "mechanism": "offer_decision",
+        "act": "endorse"
+      }
+    },
+    {
+      "id": "object_offer_decision",
+      "description": "Object to the open proposal on the term sheet.",
+      "actors": [
+        "*"
+      ],
+      "preconditions": [
+        {
+          "id": "term_sheet_open",
+          "expr": "fundraising.stage == 'term_sheet'",
+          "rejection_code": "NO_TERM_SHEET"
+        }
+      ],
+      "governance": {
+        "mechanism": "offer_decision",
+        "act": "object"
+      }
+    }
+  ],
+  "mechanisms": [
+    {
+      "id": "cash_burn",
+      "operator": "resource_flow",
+      "description": "Monthly outflow debits cash (accounting identity; inputs user-asserted).",
+      "rule": {
+        "kind": "subtract_flow",
+        "target": "company.cash_usd",
+        "rate_ref": "company.monthly_outflow_usd",
+        "interval_unit": "month"
+      },
+      "schedule": {
+        "kind": "recurring",
+        "interval": "P1M"
+      },
+      "inputs": [
+        "company.cash_usd",
+        "company.monthly_outflow_usd"
+      ],
+      "output_refs": [
+        "company.cash_usd"
+      ],
+      "epistemic_tier": "A_GROUNDED",
+      "origin": "OFFICIAL_RULE",
+      "registry_ref": {
+        "entry_id": "accounting.recurring_outflow",
+        "version": "1.0.0"
+      },
+      "evidence_refs": [
+        "user_claim_company.cash_usd",
+        "user_claim_company.monthly_outflow_usd"
+      ]
+    },
+    {
+      "id": "product_development",
+      "operator": "schedule_dependency",
+      "description": "Founder capacity advances the prototype (bounded capacity model, uncalibrated).",
+      "rule": {
+        "kind": "milestone_progress",
+        "progress_ref": "product.progress",
+        "rate": "team.fte * param.effort_productivity",
+        "interval_unit": "month",
+        "required": "param.prototype_points",
+        "done_ref": "product.ready",
+        "on_complete": [
+          {
+            "op": "emit",
+            "event_type": "prototype_ready",
+            "payload": {
+              "progress": "product.progress"
+            }
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "recurring",
+        "interval": "P1M"
+      },
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "origin": "MODEL_HYPOTHESIS",
+      "assumptions": [
+        "progress proportional to founder FTE at an exploratory productivity"
+      ]
+    },
+    {
+      "id": "pilot_signals",
+      "operator": "stochastic_event",
+      "description": "During a pilot, customer signals arrive under a declared response scenario (simulated observations only).",
+      "rule": {
+        "kind": "stochastic_draw",
+        "stream": "pilot",
+        "distribution_param": "pilot_response",
+        "when": "pilot.active",
+        "on_true": [
+          {
+            "op": "inc",
+            "ref": "pilot.signals",
+            "by": "1[customer]"
+          },
+          {
+            "op": "emit",
+            "event_type": "customer_signal",
+            "payload": {
+              "total": "pilot.signals"
+            }
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "recurring",
+        "interval": "P1M"
+      },
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "origin": "MODEL_HYPOTHESIS",
+      "assumptions": [
+        "hypothetical arrival/response process; no real sales data"
+      ]
+    },
+    {
+      "id": "traction_gate",
+      "operator": "threshold_gate",
+      "description": "Pilot traction gate (team's own definition).",
+      "rule": {
+        "kind": "threshold_gate",
+        "target": "pilot.signals",
+        "comparator": "gte",
+        "bound_ref": "param.traction_threshold",
+        "on_trigger": [
+          {
+            "op": "set",
+            "ref": "pilot.traction_met",
+            "value": "true"
+          },
+          {
+            "op": "emit",
+            "event_type": "traction_met"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "watch"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "USER_ASSERTED",
+      "assumptions": [
+        "traction defined by the team"
+      ]
+    },
+    {
+      "id": "stage_contingent_fundraise",
+      "operator": "information_process",
+      "description": "Under the pilot-first policy, traction triggers fundraising.",
+      "rule": {
+        "kind": "on_event",
+        "effects": [
+          {
+            "op": "set",
+            "ref": "fundraising.stage",
+            "value": "'preparing'",
+            "when": "decision.policy == 'stage' and fundraising.stage == 'none'"
+          },
+          {
+            "op": "inc",
+            "ref": "fundraising.attempts",
+            "by": "1[count]",
+            "when": "decision.policy == 'stage' and fundraising.stage == 'preparing' and fundraising.attempts < 1[count]"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "on_event",
+        "event_types": [
+          "traction_met"
+        ]
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "USER_ASSERTED",
+      "assumptions": [
+        "policy rule as stated"
+      ]
+    },
+    {
+      "id": "process_clock",
+      "operator": "schedule_dependency",
+      "description": "Counts months spent in an active investor process.",
+      "rule": {
+        "kind": "scheduled_effects",
+        "effects": [
+          {
+            "op": "inc",
+            "ref": "fundraising.months_in_process",
+            "by": "1[month]",
+            "when": "fundraising.stage == 'contacting' or fundraising.stage == 'diligence'"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "recurring",
+        "interval": "P1M"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "DERIVED_CALCULATION",
+      "assumptions": [
+        "process time counted in whole months"
+      ]
+    },
+    {
+      "id": "investor_process",
+      "operator": "state_machine",
+      "description": "Named conditional investor cases by climate: 'no offer' (evidence bar not met within the contact window), 'slow diligence', 'offer under assumed terms'. No acceptance probability is sampled.",
+      "rule": {
+        "kind": "state_transition",
+        "state_ref": "fundraising.stage",
+        "transitions": [
+          {
+            "from": "preparing",
+            "to": "contacting",
+            "effects": [
+              {
+                "op": "set",
+                "ref": "fundraising.months_in_process",
+                "value": "0[month]"
+              }
+            ]
+          },
+          {
+            "from": "contacting",
+            "to": "diligence",
+            "when": "product.ready and pilot.signals >= if(market.climate == 'tight', 3[customer], if(market.climate == 'favorable', 0[customer], 1[customer]))",
+            "effects": [
+              {
+                "op": "set",
+                "ref": "fundraising.months_in_process",
+                "value": "0[month]"
+              },
+              {
+                "op": "emit",
+                "event_type": "investor_diligence_started"
+              }
+            ]
+          },
+          {
+            "from": "contacting",
+            "to": "no_offer",
+            "when": "fundraising.months_in_process >= param.max_contact_months",
+            "effects": [
+              {
+                "op": "emit",
+                "event_type": "no_offer_received"
+              }
+            ]
+          },
+          {
+            "from": "diligence",
+            "to": "term_sheet",
+            "when": "fundraising.months_in_process >= if(market.climate == 'tight', param.reference_months_to_close + 2[month], if(market.climate == 'favorable', param.reference_months_to_close - 2[month], param.reference_months_to_close - 1[month]))",
+            "effects": [
+              {
+                "op": "set",
+                "ref": "fundraising.offer_usd",
+                "value": "param.round_size_usd"
+              },
+              {
+                "op": "set",
+                "ref": "fundraising.offer_pre_money_usd",
+                "value": "param.reference_pre_money_usd * if(market.climate == 'tight', 0.6, if(market.climate == 'favorable', 1.4, 1.0))"
+              },
+              {
+                "op": "emit",
+                "event_type": "term_sheet_received",
+                "payload": {
+                  "amount": "param.round_size_usd"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "recurring",
+        "interval": "P1M"
+      },
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "origin": "MODEL_HYPOTHESIS",
+      "evidence_refs": [
+        "$claim_id:seed_market_2025.median_months_to_close",
+        "$claim_id:seed_market_2025.median_pre_money_usd"
+      ],
+      "assumptions": [
+        "investor behaviour is a bounded, assumption-sensitive mechanism; 2025 references are not 2027 facts"
+      ]
+    },
+    {
+      "id": "offer_decision",
+      "operator": "social_interaction",
+      "description": "Accepting or declining requires both authorised signatories (CEO and CTO); simulated only — never a real commitment.",
+      "rule": {
+        "kind": "governance",
+        "participants": [
+          "founder_a",
+          "founder_b",
+          "founder_c",
+          "founder_d"
+        ],
+        "decision_rule": "authorized_signatories",
+        "signatories": [
+          "founder_a",
+          "founder_b"
+        ],
+        "ledger_ref": "fundraising.ledger",
+        "outcome_ref": "fundraising.decision",
+        "option_values": [
+          "accept",
+          "decline"
+        ],
+        "max_rounds": 6,
+        "on_satisfied": [
+          {
+            "op": "emit",
+            "event_type": "offer_decided",
+            "payload": {
+              "choice": "gov.option"
+            }
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "none"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "USER_ASSERTED",
+      "assumptions": [
+        "signatory rule as stated by the team"
+      ]
+    },
+    {
+      "id": "close_round",
+      "operator": "information_process",
+      "description": "If accepted, the hypothetical investment arrives (only via the investor case + authorised acceptance).",
+      "rule": {
+        "kind": "on_event",
+        "effects": [
+          {
+            "op": "inc",
+            "ref": "company.cash_usd",
+            "by": "fundraising.offer_usd",
+            "when": "event.choice == 'accept'"
+          },
+          {
+            "op": "set",
+            "ref": "fundraising.stage",
+            "value": "'closed'",
+            "when": "event.choice == 'accept'"
+          },
+          {
+            "op": "set",
+            "ref": "fundraising.stage",
+            "value": "'declined'",
+            "when": "event.choice == 'decline'"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "on_event",
+        "event_types": [
+          "offer_decided"
+        ]
+      },
+      "epistemic_tier": "C_ILLUSTRATIVE",
+      "origin": "MODEL_HYPOTHESIS",
+      "assumptions": [
+        "funding is hypothetical and conditional on the named investor case"
+      ]
+    },
+    {
+      "id": "dilution",
+      "operator": "information_process",
+      "description": "Ownership arithmetic given the case's assumed terms (Layer A identity).",
+      "rule": {
+        "kind": "on_event",
+        "effects": [
+          {
+            "op": "set",
+            "ref": "company.founder_ownership",
+            "value": "company.founder_ownership * fundraising.offer_pre_money_usd / (fundraising.offer_pre_money_usd + fundraising.offer_usd)",
+            "when": "event.choice == 'accept'"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "on_event",
+        "event_types": [
+          "offer_decided"
+        ]
+      },
+      "epistemic_tier": "A_GROUNDED",
+      "origin": "OFFICIAL_RULE",
+      "registry_ref": {
+        "entry_id": "finance.dilution_math",
+        "version": "1.0.0"
+      }
+    },
+    {
+      "id": "runway_alert",
+      "operator": "threshold_gate",
+      "description": "Founders reconsider when runway falls below six months.",
+      "rule": {
+        "kind": "threshold_gate",
+        "target": "company.cash_usd",
+        "comparator": "lt",
+        "bound_ref": "company.monthly_outflow_usd * 6[month]",
+        "on_trigger": [
+          {
+            "op": "wake",
+            "agents": [
+              "*"
+            ],
+            "reason": "runway below six months"
+          }
+        ],
+        "once": false
+      },
+      "schedule": {
+        "kind": "watch"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "DERIVED_CALCULATION",
+      "assumptions": [
+        "founders reconsider when runway < 6 months"
+      ]
+    },
+    {
+      "$requires": "study_runway_retention.founder_runway_effect",
+      "$requires_why": "founder departure needs external evidence before it may be modeled",
+      "id": "founder_retention",
+      "operator": "threshold_gate",
+      "description": "Founder departure risk when runway falls below ~3 months without funding (supported by an external study; transfer to this team is an assumption).",
+      "rule": {
+        "kind": "threshold_gate",
+        "target": "company.cash_usd",
+        "comparator": "lt",
+        "bound_ref": "company.monthly_outflow_usd * 3[month]",
+        "on_trigger": [
+          {
+            "op": "dec",
+            "ref": "team.founders",
+            "by": "1[person]",
+            "when": "not (fundraising.stage == 'closed')"
+          },
+          {
+            "op": "dec",
+            "ref": "team.fte",
+            "by": "1[person]",
+            "when": "not (fundraising.stage == 'closed') and team.fte >= 1[person]"
+          },
+          {
+            "op": "emit",
+            "event_type": "founder_left",
+            "when": "not (fundraising.stage == 'closed')"
+          }
+        ]
+      },
+      "schedule": {
+        "kind": "watch"
+      },
+      "epistemic_tier": "B_ASSUMPTION_BOUND",
+      "origin": "HISTORICAL_DATASET",
+      "evidence_refs": [
+        "$claim_id:study_runway_retention.founder_runway_effect"
+      ],
+      "assumptions": [
+        "study population transfers to this team"
+      ]
+    },
+    {
+      "id": "react_to_milestones",
+      "operator": "feedback_control",
+      "description": "Founders reconsider on prototype, traction, offers and process outcomes.",
+      "rule": {
+        "kind": "wakeup",
+        "agents": [
+          "*"
+        ],
+        "latency": "P3D",
+        "reason": "milestone_or_investor_news",
+        "exclude_actor": false
+      },
+      "schedule": {
+        "kind": "on_event",
+        "event_types": [
+          "prototype_ready",
+          "traction_met",
+          "term_sheet_received",
+          "no_offer_received",
+          "financing_climate_shift",
+          "founder_availability_change"
+        ]
+      },
+      "assumptions": [
+        "founders review news within a few days"
+      ]
+    },
+    {
+      "id": "respond_to_offer_proposals",
+      "operator": "feedback_control",
+      "description": "Founders respond to term-sheet proposals.",
+      "rule": {
+        "kind": "wakeup",
+        "agents": [
+          "*"
+        ],
+        "latency": "P2D",
+        "reason": "proposal_needs_response"
+      },
+      "schedule": {
+        "kind": "on_event",
+        "event_types": [
+          "action:propose_offer_decision",
+          "action:object_offer_decision"
+        ]
+      },
+      "assumptions": [
+        "founders respond within two days"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "cash_nonnegative",
+      "type": "guarded_floor",
+      "path": "company.cash_usd",
+      "min": 0,
+      "validated": true,
+      "evidence_refs": [
+        "user_constraint_cash_floor"
+      ],
+      "description": "The company cannot spend cash it does not have.",
+      "on_violation": {
+        "action": "terminate",
+        "outcome": "CASH_EXHAUSTED",
+        "reason": "The next outflow would make cash negative; the trajectory stops instead of clipping cash."
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "cash_runway_months",
+      "label": "Cash runway",
+      "expr": "if(company.monthly_outflow_usd > 0, to(company.cash_usd / company.monthly_outflow_usd, 'month'), UNKNOWN)",
+      "unit": "month",
+      "direction": "higher_better"
+    },
+    {
+      "id": "cash_usd",
+      "label": "Cash",
+      "expr": "company.cash_usd",
+      "unit": "USD",
+      "direction": "higher_better"
+    },
+    {
+      "id": "customer_evidence",
+      "label": "Customer signals (simulated)",
+      "expr": "pilot.signals",
+      "unit": "customer",
+      "direction": "higher_better"
+    },
+    {
+      "id": "funded",
+      "label": "Round closed (hypothetical)",
+      "expr": "fundraising.stage == 'closed'"
+    },
+    {
+      "id": "founder_ownership_pct",
+      "label": "Founders' ownership",
+      "expr": "company.founder_ownership",
+      "unit": "%"
+    },
+    {
+      "$requires": "study_runway_retention.founder_runway_effect",
+      "id": "founder_retention",
+      "label": "Founders remaining",
+      "expr": "team.founders / 4[person]",
+      "unit": "1",
+      "direction": "higher_better"
+    },
+    {
+      "$unless": "study_runway_retention.founder_runway_effect",
+      "id": "founder_retention",
+      "label": "Founders remaining",
+      "computable": false,
+      "reason": "No evidence-backed founder-departure mechanism; the model abstains rather than inventing one."
+    }
+  ],
+  "causal_assumptions": [
+    "Cash follows the accounting identity with user-asserted inputs.",
+    "Future financing conditions are named cases without probabilities.",
+    "Customer signals are simulated observations inside the branch only; they never update real demand facts."
+  ],
+  "structural_unknowns": [
+    {
+      "$unless": "study_runway_retention.founder_runway_effect",
+      "id": "founder_retention_process",
+      "impact": "high",
+      "affects_metrics": [
+        "founder_retention"
+      ],
+      "description": "Whether and when founders leave under financial stress is not represented."
+    },
+    {
+      "id": "investor_demand_process",
+      "impact": "high",
+      "affects_metrics": [
+        "funded"
+      ],
+      "status": "MODELED_AS_SCENARIO",
+      "description": "Real investor demand in 2027 cannot be observed; represented only as named conditional cases."
+    }
+  ],
+  "omissions": [
+    {
+      "id": "tax_legal",
+      "description": "Tax details, incorporation costs and future regulatory changes.",
+      "reason": "outside the decision scope",
+      "risk": "low"
+    },
+    {
+      "id": "revenue",
+      "description": "Pilot revenue and service income are not modeled.",
+      "reason": "no pricing evidence supplied",
+      "risk": "medium"
+    }
+  ],
+  "breadth_hints": [
+    {
+      "label": "Raise now",
+      "policy_id": "now",
+      "family_kind": "policy",
+      "user_interest": true
+    },
+    {
+      "label": "Defer fundraising 12 months",
+      "policy_id": "later",
+      "family_kind": "policy",
+      "user_interest": true
+    },
+    {
+      "label": "Pilot first, raise on traction",
+      "policy_id": "stage",
+      "family_kind": "policy",
+      "user_interest": true
+    },
+    {
+      "label": "Immediate fundraising succeeds at assumed terms",
+      "outcome_match": {
+        "ref": "fundraising.stage",
+        "value": "closed"
+      },
+      "method": "policy_alternatives",
+      "family_kind": "outcome"
+    },
+    {
+      "label": "Fundraising attempt yields no offer",
+      "outcome_match": {
+        "ref": "fundraising.stage",
+        "value": "no_offer"
+      },
+      "method": "adverse_cases",
+      "family_kind": "outcome"
+    },
+    {
+      "label": "Runway collapses before funding",
+      "outcome_match": {
+        "ref": "fundraising.stage",
+        "value": "none"
+      },
+      "method": "adverse_cases",
+      "family_kind": "outcome"
+    },
+    {
+      "label": "Tighter climate in 2027",
+      "policy_id": "later",
+      "scenario_ids": [
+        "climate_tightens_2027_10"
+      ],
+      "method": "external_variations"
+    },
+    {
+      "label": "One founder shifts time availability",
+      "policy_id": "stage",
+      "scenario_ids": [
+        "founder_time_shift"
+      ],
+      "method": "behavioral_responses"
+    },
+    {
+      "label": "Bootstrapped expansion",
+      "required_mechanisms": [
+        "revenue_process"
+      ],
+      "method": "policy_alternatives"
+    },
+    {
+      "label": "Service revenue bridge",
+      "required_mechanisms": [
+        "revenue_process"
+      ],
+      "method": "policy_alternatives"
+    },
+    {
+      "label": "Strategic partnership",
+      "required_mechanisms": [
+        "partner_process"
+      ],
+      "method": "omitted_actors"
+    },
+    {
+      "label": "A founder leaves",
+      "required_mechanisms": [
+        "founder_retention"
+      ],
+      "method": "behavioral_responses"
+    },
+    {
+      "label": "Regulatory or market change alters viability",
+      "required_mechanisms": [
+        "regulatory_process"
+      ],
+      "method": "low_probability_high_impact"
+    },
+    {
+      "label": "Deliberate shutdown",
+      "required_mechanisms": [
+        "shutdown_decision"
+      ],
+      "method": "adverse_cases"
+    }
+  ],
+  "research_needs": [
+    {
+      "kind": "FORECAST_INPUT",
+      "question": "What will the financing climate be in 2027?",
+      "target_refs": [
+        "vc_market.climate_2027"
+      ],
+      "why": "determines which named investor case applies",
+      "consequence": "future climate cannot be observed; represented as named conditional cases"
+    }
+  ]
+}

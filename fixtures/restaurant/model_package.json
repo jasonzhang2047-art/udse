@@ -1,0 +1,241 @@
+{
+  "purpose": "Explore how a four-person Saturday dinner choice may unfold between 17:00 and 22:00 under explicit evidence and assumptions (synthetic fixture).",
+  "decision_criteria": ["decision_reached", "dietary_constraints_verified", "spend_usd", "arrival_at"],
+  "odd": {
+    "purpose": "Group venue choice with personal hard constraints, live-availability uncertainty and a group decision rule.",
+    "entities_state_scales": "Group and three candidate venues; minute resolution over a 5-hour evening.",
+    "process_overview_scheduling": "Agents wake at planned times, on proposals/objections, on information arrival and on travel news. Unanimous governance; travel, seating wait and dining are timed events.",
+    "initialization": "Venue facts from official pages and provider responses (dated); unknown availability stays UNKNOWN.",
+    "inputs": "Fixture evidence bundle; uncalibrated wait distribution (Tier C); hypothetical travel delay.",
+    "submodels": "group_choice governance, allergen information process, travel delay, arrival/seating/dining, deadline rule.",
+    "evaluation_rationale": "Checks that hard constraints are never bypassed, that unverified availability cannot become a booking, and that the same kernel runs this and the funding fixture."
+  },
+  "scope": {"time_resolution": "minute", "domain_labels": ["dining", "group_choice"]},
+  "entities": [
+    {"id": "group", "type": "group", "label": "Dinner group"},
+    {"id": "r_a", "type": "venue", "label": "R-A (fixture)"},
+    {"id": "r_b", "type": "venue", "label": "R-B (fixture)"},
+    {"id": "r_c", "type": "venue", "label": "R-C (fixture)"}
+  ],
+  "state": [
+    {"ref": "r_a.opens_at", "type": "timestamp", "label": "R-A opens", "initial_value": {"$claim": "r_a.opens_at", "critical": true, "why": "opening hours gate seating"}},
+    {"ref": "r_a.closes_at", "type": "timestamp", "label": "R-A closes", "initial_value": {"$claim": "r_a.closes_at", "critical": true, "why": "closing time limits feasible arrival"}},
+    {"ref": "r_a.vegetarian_main", "type": "boolean", "label": "R-A vegetarian main", "initial_value": {"$claim": "r_a.vegetarian_main", "why": "Person A's preference"}},
+    {"ref": "r_a.gluten_safe", "type": "boolean", "label": "R-A gluten handling (venue notice)", "visibility": {"scope": "hidden"}, "initial_value": {"$claim": "r_a.gluten_free_handling", "critical": true, "why": "Person B's hard dietary constraint"}},
+    {"ref": "r_a.gluten_reported", "type": "boolean", "label": "R-A gluten handling as reported to the group", "initial_value": "UNKNOWN", "allow_unknown": true, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "r_a.price_pp", "type": "quantity", "unit": "USD", "label": "R-A price per person", "initial_value": {"$claim": "r_a.price_per_person", "why": "Person C's price sensitivity; group budget"}},
+    {"ref": "r_a.travel_min", "type": "quantity", "unit": "minute", "label": "R-A travel time", "initial_value": {"$claim": "r_a.travel_time_minutes", "why": "Person D must arrive by 19:30"}},
+    {"ref": "r_a.table_for_4", "type": "enum", "values": ["AVAILABLE", "UNAVAILABLE"], "label": "R-A table for 4 at 19:00 (provider)", "initial_value": {"$claim": "r_a.table_for_4_at_1900", "stale_policy": "unknown", "critical": true, "why": "only a provider response can establish availability"}},
+
+    {"ref": "r_b.opens_at", "type": "timestamp", "label": "R-B opens", "initial_value": {"$claim": "r_b.opens_at", "critical": true}},
+    {"ref": "r_b.closes_at", "type": "timestamp", "label": "R-B closes", "initial_value": {"$claim": "r_b.closes_at", "critical": true}},
+    {"ref": "r_b.vegetarian_main", "type": "boolean", "label": "R-B vegetarian main", "initial_value": {"$claim": "r_b.vegetarian_main"}},
+    {"ref": "r_b.gluten_safe", "type": "boolean", "label": "R-B gluten handling (venue notice)", "visibility": {"scope": "hidden"}, "initial_value": {"$claim": "r_b.gluten_free_handling", "critical": true}},
+    {"ref": "r_b.gluten_reported", "type": "boolean", "label": "R-B gluten handling as reported to the group", "initial_value": "UNKNOWN", "allow_unknown": true, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "r_b.price_pp", "type": "quantity", "unit": "USD", "label": "R-B price per person", "initial_value": {"$claim": "r_b.price_per_person", "stale_policy": "use_with_downgrade"}},
+    {"ref": "r_b.travel_min", "type": "quantity", "unit": "minute", "label": "R-B travel time", "initial_value": {"$claim": "r_b.travel_time_minutes"}},
+    {"ref": "r_b.table_for_4", "type": "enum", "values": ["AVAILABLE", "UNAVAILABLE"], "label": "R-B table for 4 at 19:00 (provider)", "initial_value": {"$claim": "r_b.table_for_4_at_1900", "stale_policy": "unknown", "critical": true}},
+
+    {"ref": "r_c.opens_at", "type": "timestamp", "label": "R-C opens", "initial_value": {"$claim": "r_c.opens_at", "critical": true}},
+    {"ref": "r_c.closes_at", "type": "timestamp", "label": "R-C closes", "initial_value": {"$claim": "r_c.closes_at", "critical": true}},
+    {"ref": "r_c.vegetarian_main", "type": "boolean", "label": "R-C vegetarian main", "initial_value": {"$claim": "r_c.vegetarian_main"}},
+    {"ref": "r_c.gluten_safe", "type": "boolean", "label": "R-C gluten handling (venue notice)", "visibility": {"scope": "hidden"}, "initial_value": {"$claim": "r_c.gluten_free_handling", "critical": true}},
+    {"ref": "r_c.gluten_reported", "type": "boolean", "label": "R-C gluten handling as reported to the group", "initial_value": "UNKNOWN", "allow_unknown": true, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "r_c.price_pp", "type": "quantity", "unit": "USD", "label": "R-C price per person", "initial_value": {"$claim": "r_c.price_per_person"}},
+    {"ref": "r_c.travel_min", "type": "quantity", "unit": "minute", "label": "R-C travel time", "initial_value": {"$claim": "r_c.travel_time_minutes"}},
+    {"ref": "r_c.table_for_4", "type": "enum", "values": ["AVAILABLE", "UNAVAILABLE"], "label": "R-C table for 4 at 19:00 (provider)", "initial_value": {"$claim": "r_c.table_for_4_at_1900", "stale_policy": "unknown", "critical": true}},
+
+    {"ref": "group.choice", "type": "enum", "values": ["r_a", "r_b", "r_c"], "label": "Agreed venue (simulated)", "initial_value": "UNKNOWN", "allow_unknown": true, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "group.ledger", "type": "ledger", "label": "Proposals and endorsements", "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "group.status", "type": "enum", "values": ["deliberating", "en_route", "waiting", "seated", "dined", "unresolved", "no_agreement", "deferred"], "label": "Group status", "initial_value": "deliberating", "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "group.arrival_at", "type": "timestamp", "label": "Arrival time (simulated)", "initial_value": "UNKNOWN", "allow_unknown": true, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "group.travel_delay_min", "type": "quantity", "unit": "minute", "label": "Travel delay (hypothetical)", "initial_value": 0, "origin": "MODEL_HYPOTHESIS", "epistemic_tier": "C_ILLUSTRATIVE"},
+    {"ref": "group.wait_min", "type": "quantity", "unit": "minute", "label": "Seating wait (assumed distribution)", "initial_value": 0, "origin": "MODEL_HYPOTHESIS", "epistemic_tier": "C_ILLUSTRATIVE"},
+    {"ref": "group.spend_usd", "type": "quantity", "unit": "USD", "label": "Group spend", "initial_value": 0, "origin": "DERIVED_CALCULATION", "epistemic_tier": "A_GROUNDED"},
+    {"ref": "group.budget_usd", "type": "quantity", "unit": "USD", "label": "Group budget", "initial_value": {"$fact": "group.budget_usd"}},
+    {"ref": "group.decision_deadline", "type": "timestamp", "label": "Group's decide-by time", "is_deadline": true, "initial_value": {"$fact": "group.decision_deadline"}},
+    {"ref": "group.table_assumed_available", "type": "boolean", "label": "BRANCH ASSUMPTION: table assumed available (not a booking)", "initial_value": false, "origin": "MODEL_HYPOTHESIS", "epistemic_tier": "C_ILLUSTRATIVE"}
+  ],
+  "parameters": [
+    {"id": "wait_minutes", "type": "distribution", "unit": "minute", "source_kind": "declared_exploratory_range", "epistemic_tier": "C_ILLUSTRATIVE",
+     "description": "Uncalibrated seating wait; no capacity data is available.",
+     "distribution": {"kind": "uniform", "low": 5, "high": 40, "unit": "minute"},
+     "scenario_values": {"short_wait": {"kind": "uniform", "low": 0, "high": 10, "unit": "minute"}, "long_wait": {"kind": "uniform", "low": 25, "high": 60, "unit": "minute"}}},
+    {"id": "travel_delay", "type": "distribution", "source_kind": "declared_exploratory_range", "epistemic_tier": "C_ILLUSTRATIVE",
+     "description": "Hypothetical chance of a 20-minute travel disruption announced at 18:00.",
+     "distribution": {"kind": "bernoulli", "p": 0.3},
+     "scenario_values": {"no_travel_delay": {"kind": "bernoulli", "p": 0.0}, "disruption_at_1800": {"kind": "bernoulli", "p": 1.0}}}
+  ],
+  "scenarios": [
+    {"id": "short_wait", "label": "Short seating waits (assumed)", "kind": "external_condition", "assumptions": ["seating wait 0-10 min (exploratory)"]},
+    {"id": "long_wait", "label": "Long seating waits (assumed)", "kind": "external_condition", "assumptions": ["seating wait 25-60 min (exploratory)"]},
+    {"id": "no_travel_delay", "label": "No travel disruption", "kind": "external_condition", "assumptions": ["no disruption at 18:00"]},
+    {"id": "disruption_at_1800", "label": "Travel disruption at 18:00 (hypothetical)", "kind": "external_condition", "assumptions": ["20-minute disruption announced at 18:00"]},
+    {"id": "r_a_fully_booked", "label": "EVIDENCE SCENARIO: provider shows R-A fully booked", "kind": "evidence_scenario",
+     "description": "What if the provider's 19:00 answer for R-A had been 'no availability'? A named alternative evidence state, not a forecast.",
+     "state_overrides": {"r_a.table_for_4": "UNAVAILABLE"}, "assumptions": ["alternative provider response for R-A (hypothetical)"]},
+    {"id": "assume_tables_available", "label": "BRANCH ASSUMPTION: tables available", "kind": "branch_assumption",
+     "description": "Explores trajectories as if a table were available. This is not a reservation and not evidence.",
+     "state_overrides": {"group.table_assumed_available": true}, "assumptions": ["table availability assumed for exploration only"]}
+  ],
+  "policies": [
+    {"id": "deliberate", "label": "Choose together, decide by 18:45", "description": "Open deliberation under the group's own decide-by rule."},
+    {"id": "deliberate_early", "label": "Choose together, decide by 18:00", "description": "Same process with an earlier decide-by rule.",
+     "initial_effects": [{"op": "set", "ref": "group.decision_deadline", "value": "time('2026-10-24T18:00:00-07:00')"}]},
+    {"id": "defer", "label": "Skip going out", "alternative_ref": "defer", "description": "The group stays in; no deliberation.",
+     "initial_effects": [{"op": "set", "ref": "group.status", "value": "'deferred'"}, {"op": "terminate", "outcome": "DEFERRED", "reason": "The group chose not to go out."}]}
+  ],
+  "agents": [
+    {"id": "agent_a", "display_name": "Person A", "profile_ref": "profile_user_a", "initial_wakeups": ["+PT15M"], "periodic_review": "PT30M", "max_wakeups": 16},
+    {"id": "agent_b", "display_name": "Person B", "profile_ref": "profile_user_b", "initial_wakeups": ["+PT18M"], "periodic_review": "PT30M", "max_wakeups": 16},
+    {"id": "agent_c", "display_name": "Person C", "profile_ref": "profile_user_c", "initial_wakeups": ["+PT22M"], "periodic_review": "PT30M", "max_wakeups": 16},
+    {"id": "agent_d", "display_name": "Person D", "profile_ref": "profile_user_d", "initial_wakeups": ["+PT26M"], "periodic_review": "PT30M", "max_wakeups": 16}
+  ],
+  "actions": [
+    {"id": "propose_venue", "description": "Propose a venue to the group.", "actors": ["*"],
+     "args": [{"name": "venue", "type": "enum", "values": ["r_a", "r_b", "r_c"]}],
+     "preconditions": [
+       {"id": "still_deliberating", "expr": "group.status == 'deliberating'", "rejection_code": "DECISION_CLOSED"},
+       {"id": "open_long_enough", "expr": "field(arg.venue, 'closes_at') > now + field(arg.venue, 'travel_min') + 90[minute]", "rejection_code": "CLOSES_TOO_SOON"}
+     ],
+     "governance": {"mechanism": "group_choice", "act": "propose", "option_arg": "venue"},
+     "appraisal": {
+       "cost_pp": "field(arg.venue, 'price_pp')",
+       "vegetarian_main": "field(arg.venue, 'vegetarian_main')",
+       "gluten_safe": "field(arg.venue, 'gluten_reported')",
+       "est_arrival": "now + field(arg.venue, 'travel_min') + group.travel_delay_min + 15[minute]",
+       "table_confirmed": "field(arg.venue, 'table_for_4') == 'AVAILABLE'"
+     },
+     "epistemic_tier": "B_ASSUMPTION_BOUND"},
+    {"id": "endorse_proposal", "description": "Endorse the open proposal.", "actors": ["*"],
+     "preconditions": [{"id": "still_deliberating", "expr": "group.status == 'deliberating'", "rejection_code": "DECISION_CLOSED"}],
+     "governance": {"mechanism": "group_choice", "act": "endorse"}},
+    {"id": "object_proposal", "description": "Object to the open proposal.", "actors": ["*"],
+     "preconditions": [{"id": "still_deliberating", "expr": "group.status == 'deliberating'", "rejection_code": "DECISION_CLOSED"}],
+     "governance": {"mechanism": "group_choice", "act": "object"}},
+    {"id": "request_allergen_info", "description": "Ask a venue to confirm its gluten handling (reply in ~25 minutes).", "actors": ["*"],
+     "tags": ["information_request"],
+     "args": [{"name": "venue", "type": "enum", "values": ["r_a", "r_b", "r_c"]}],
+     "preconditions": [{"id": "still_deliberating", "expr": "group.status == 'deliberating'", "rejection_code": "DECISION_CLOSED"},
+                       {"id": "not_yet_known", "expr": "not is_known(field(arg.venue, 'gluten_reported'))", "rejection_code": "ALREADY_KNOWN"}],
+     "effects": [{"op": "emit", "event_type": "allergen_info_response", "delay": "PT25M",
+                  "payload": {"venue": "arg.venue", "gluten_safe": "field(arg.venue, 'gluten_safe')"}}],
+     "epistemic_tier": "B_ASSUMPTION_BOUND"}
+  ],
+  "mechanisms": [
+    {"id": "group_choice", "operator": "social_interaction",
+     "description": "Unanimous agreement among the four participants; agreement is simulated and never books anything.",
+     "rule": {"kind": "governance", "participants": ["agent_a", "agent_b", "agent_c", "agent_d"], "decision_rule": "unanimous",
+              "ledger_ref": "group.ledger", "outcome_ref": "group.choice", "option_values": ["r_a", "r_b", "r_c"], "max_rounds": 10,
+              "on_satisfied": [
+                {"op": "set", "ref": "group.status", "value": "'en_route'"},
+                {"op": "emit", "event_type": "group_arrives", "delay": "field(gov.option, 'travel_min') + group.travel_delay_min", "payload": {"venue": "gov.option"}}
+              ]},
+     "schedule": {"kind": "none"}, "epistemic_tier": "B_ASSUMPTION_BOUND", "origin": "USER_ASSERTED",
+     "assumptions": ["the group's stated rule is unanimity"]},
+    {"id": "allergen_info", "operator": "information_process",
+     "description": "A venue's reply reveals only what its own notice says; no reassurance is fabricated (unknown stays UNKNOWN).",
+     "rule": {"kind": "on_event", "effects": [
+       {"op": "set", "ref": "r_a.gluten_reported", "value": "event.gluten_safe", "when": "event.venue == 'r_a'"},
+       {"op": "set", "ref": "r_b.gluten_reported", "value": "event.gluten_safe", "when": "event.venue == 'r_b'"},
+       {"op": "set", "ref": "r_c.gluten_reported", "value": "event.gluten_safe", "when": "event.venue == 'r_c'"}
+     ]},
+     "schedule": {"kind": "on_event", "event_types": ["allergen_info_response"]},
+     "epistemic_tier": "A_GROUNDED", "origin": "DERIVED_CALCULATION",
+     "evidence_refs": ["$claim_id:r_a.gluten_free_handling", "$claim_id:r_c.gluten_free_handling"]},
+    {"id": "travel_disruption", "operator": "stochastic_event",
+     "description": "Hypothetical 20-minute travel disruption announced at 18:00 (exploratory probability, not a forecast).",
+     "rule": {"kind": "stochastic_draw", "stream": "travel", "distribution_param": "travel_delay",
+              "on_true": [{"op": "set", "ref": "group.travel_delay_min", "value": "20[minute]"},
+                          {"op": "emit", "event_type": "travel_delay_reported", "payload": {"minutes": "20[minute]"}}]},
+     "schedule": {"kind": "at", "times": ["2026-10-24T18:00:00-07:00"]},
+     "epistemic_tier": "C_ILLUSTRATIVE", "origin": "MODEL_HYPOTHESIS", "assumptions": ["disruption probability is a declared exploratory value"]},
+    {"id": "arrival", "operator": "information_process",
+     "description": "On arrival, only a provider-confirmed table (or an explicit branch assumption) allows seating; otherwise the trajectory is unresolved.",
+     "rule": {"kind": "on_event", "effects": [
+       {"op": "set", "ref": "group.arrival_at", "value": "now"},
+       {"op": "set", "ref": "group.status", "value": "'waiting'", "when": "field(event.venue, 'table_for_4') == 'AVAILABLE' or group.table_assumed_available"},
+       {"op": "emit", "event_type": "seating_wait", "payload": {"venue": "event.venue"}, "when": "field(event.venue, 'table_for_4') == 'AVAILABLE' or group.table_assumed_available"},
+       {"op": "set", "ref": "group.status", "value": "'unresolved'", "when": "(not is_known(field(event.venue, 'table_for_4')) or field(event.venue, 'table_for_4') == 'UNAVAILABLE') and not group.table_assumed_available"},
+       {"op": "terminate", "outcome": "UNRESOLVED_TABLE_AVAILABILITY", "reason": "Arrived without provider-confirmed availability; real availability is UNKNOWN and no booking was made.",
+        "when": "(not is_known(field(event.venue, 'table_for_4')) or field(event.venue, 'table_for_4') == 'UNAVAILABLE') and not group.table_assumed_available"}
+     ]},
+     "schedule": {"kind": "on_event", "event_types": ["group_arrives"]}, "epistemic_tier": "B_ASSUMPTION_BOUND", "origin": "DERIVED_CALCULATION", "assumptions": ["seating requires provider-confirmed availability or an explicit branch assumption"]},
+    {"id": "seating_wait", "operator": "stochastic_event",
+     "description": "Seating wait drawn from an uncalibrated assumed distribution (Tier C).",
+     "rule": {"kind": "stochastic_draw", "stream": "venue_capacity", "distribution_param": "wait_minutes", "target": "group.wait_min",
+              "outcomes": {"*": [{"op": "emit", "event_type": "seated", "delay": "group.wait_min", "payload": {"venue": "event.venue"}}]}},
+     "schedule": {"kind": "on_event", "event_types": ["seating_wait"]},
+     "epistemic_tier": "C_ILLUSTRATIVE", "origin": "MODEL_HYPOTHESIS", "assumptions": ["no capacity data; uniform exploratory range"]},
+    {"id": "seated", "operator": "information_process", "description": "Seated: dinner costs accrue for four people.",
+     "rule": {"kind": "on_event", "effects": [
+       {"op": "set", "ref": "group.status", "value": "'seated'"},
+       {"op": "inc", "ref": "group.spend_usd", "by": "field(event.venue, 'price_pp') * 4"},
+       {"op": "emit", "event_type": "dinner_finished", "delay": "PT90M"}
+     ]},
+     "schedule": {"kind": "on_event", "event_types": ["seated"]}, "epistemic_tier": "B_ASSUMPTION_BOUND", "origin": "DERIVED_CALCULATION", "assumptions": ["everyone orders at the venue's typical per-person price"]},
+    {"id": "dinner_done", "operator": "information_process", "description": "Dinner ends.",
+     "rule": {"kind": "on_event", "effects": [{"op": "set", "ref": "group.status", "value": "'dined'"},
+                                               {"op": "terminate", "outcome": "DINED", "reason": "The group dined (simulated)."}]},
+     "schedule": {"kind": "on_event", "event_types": ["dinner_finished"]}, "epistemic_tier": "B_ASSUMPTION_BOUND", "origin": "DERIVED_CALCULATION", "assumptions": ["dinner lasts about 90 minutes"]},
+    {"id": "deadline_rule", "operator": "exogenous_process",
+     "description": "The group's own rule: no venue agreed by the decide-by time means everyone eats at home.",
+     "rule": {"kind": "scheduled_effects", "effects": [
+       {"op": "set", "ref": "group.status", "value": "'no_agreement'", "when": "now >= group.decision_deadline and group.status == 'deliberating'"},
+       {"op": "terminate", "outcome": "NO_AGREEMENT_BY_DEADLINE", "reason": "No venue was agreed by the group's decide-by time.", "when": "now >= group.decision_deadline and group.status == 'no_agreement'"}
+     ]},
+     "schedule": {"kind": "recurring", "interval": "PT15M", "start": "+PT15M"},
+     "epistemic_tier": "B_ASSUMPTION_BOUND", "origin": "USER_ASSERTED", "evidence_refs": ["user_claim_group.decision_deadline"],
+     "assumptions": ["the group's decide-by rule as stated by the decision owner"]},
+    {"id": "respond_to_proposal", "operator": "feedback_control", "description": "Others consider a new proposal after a few minutes.",
+     "rule": {"kind": "wakeup", "agents": ["*"], "latency": "PT12M", "reason": "proposal_needs_response"},
+     "schedule": {"kind": "on_event", "event_types": ["action:propose_venue", "action:object_proposal"]}, "assumptions": ["participants respond to proposals within about twelve minutes"]},
+    {"id": "react_to_information", "operator": "feedback_control", "description": "Everyone reconsiders when venue information or travel news arrives.",
+     "rule": {"kind": "wakeup", "agents": ["*"], "latency": "PT2M", "reason": "new_information", "exclude_actor": false},
+     "schedule": {"kind": "on_event", "event_types": ["allergen_info_response", "travel_delay_reported"]}, "assumptions": ["participants notice new venue information or travel news within two minutes"]}
+  ],
+  "constraints": [
+    {"id": "within_group_budget", "type": "guarded_ceiling", "path": "group.spend_usd", "max": {"$fact": "group.budget_usd"},
+     "description": "Group budget (user-asserted hard limit)", "validated": true, "evidence_refs": ["user_constraint_group_budget"],
+     "on_violation": {"action": "terminate", "outcome": "OVER_BUDGET", "reason": "Spending would exceed the stated group budget."}},
+    {"id": "arrive_before_closing", "type": "expression",
+     "expr": "not (is_known(group.arrival_at) and is_known(group.choice) and group.arrival_at >= field(group.choice, 'closes_at'))",
+     "description": "A venue cannot seat guests after its official closing time.", "validated": true,
+     "evidence_refs": ["$claim_id:r_a.closes_at", "$claim_id:r_b.closes_at", "$claim_id:r_c.closes_at"],
+     "on_violation": {"action": "terminate", "outcome": "ARRIVED_AFTER_CLOSING", "reason": "Arrival after official closing time."}}
+  ],
+  "metrics": [
+    {"id": "decision_reached", "label": "Venue agreed", "expr": "is_known(group.choice)"},
+    {"id": "dietary_constraints_verified", "label": "Chosen venue's gluten handling confirmed to the group", "expr": "coalesce(field(group.choice, 'gluten_reported'), false)"},
+    {"id": "spend_usd", "label": "Group spend", "expr": "group.spend_usd", "unit": "USD", "direction": "lower_better"},
+    {"id": "arrival_at", "label": "Arrival time", "expr": "group.arrival_at"},
+    {"id": "seating_wait_min", "label": "Seating wait", "expr": "group.wait_min", "unit": "minute", "direction": "lower_better"}
+  ],
+  "causal_assumptions": [
+    "Venue facts hold for the evening as published at retrieval time.",
+    "Agents learn venue gluten handling only by asking; replies repeat the venue's own notice.",
+    "Seating requires provider-confirmed availability or an explicit branch assumption."
+  ],
+  "structural_unknowns": [
+    {"id": "live_capacity", "description": "Real-time seating capacity is not observed; waits use an uncalibrated assumed distribution.", "impact": "medium", "affects_metrics": ["arrival_at", "seating_wait_min"], "status": "MODELED_AS_SCENARIO"}
+  ],
+  "omissions": [
+    {"id": "parking_weather", "description": "Parking, weather and traffic variation beyond one hypothetical disruption.", "reason": "low decision relevance in scope", "risk": "low"},
+    {"id": "menu_ingredient_detail", "description": "Ingredient-level safety: menus and notices are not safety guarantees; B must confirm with the venue.", "reason": "cannot be verified remotely", "risk": "high"}
+  ],
+  "breadth_hints": [
+    {"label": "Single shared restaurant (decide by 18:45)", "policy_id": "deliberate", "method": "policy_alternatives", "family_kind": "policy", "user_interest": true},
+    {"label": "Earlier dinner (decide by 18:00)", "policy_id": "deliberate_early", "method": "timing_irreversibility", "family_kind": "policy"},
+    {"label": "Skip going out", "policy_id": "defer", "method": "policy_alternatives", "family_kind": "policy"},
+    {"label": "Dinner at R-A", "outcome_match": {"ref": "group.choice", "value": "r_a"}, "method": "domain_constraints", "family_kind": "outcome"},
+    {"label": "Dinner at R-B", "outcome_match": {"ref": "group.choice", "value": "r_b"}, "method": "domain_constraints", "family_kind": "outcome"},
+    {"label": "Dinner at R-C", "outcome_match": {"ref": "group.choice", "value": "r_c"}, "method": "domain_constraints", "family_kind": "outcome"},
+    {"label": "No agreement by the decide-by time", "outcome_match": {"ref": "group.status", "value": "no_agreement"}, "method": "adverse_cases", "family_kind": "outcome"},
+    {"label": "Later dinner after 20:00", "required_mechanisms": ["late_seating"], "method": "timing_irreversibility"},
+    {"label": "Takeout at home", "required_mechanisms": ["delivery_process"], "method": "policy_alternatives"},
+    {"label": "Split into two smaller groups", "required_mechanisms": ["split_coordination"], "method": "behavioral_responses"},
+    {"label": "Late dinner at R-C after its 21:00 closing", "infeasible_under": "arrive_before_closing", "method": "domain_constraints"},
+    {"label": "Seated without confirmed availability (assumed table)", "scenario_ids": ["assume_tables_available"], "policy_id": "deliberate", "method": "external_variations"},
+    {"label": "Agreed venue turns out to have no table", "outcome_match": {"ref": "group.status", "value": "unresolved"}, "method": "adverse_cases", "family_kind": "outcome"}
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "_fixture_notice": "Synthetic people. Features are illustrative onboarding statements, not real users.",
+  "users": [
+    {"user_id": "user_a", "display_name": "Person A", "token": "dev-token-user-a", "profile_id": "profile_user_a",
+     "onboarding": "I prefer places with a proper vegetarian main. I don't mind paying a bit more.",
+     "features": [
+       {"key": "preference.vegetarian_main", "value": {"weight": 3.0}, "status": "CONFIRMED", "epistemic_confidence": "high", "relevance": 0.9, "scope": "dining"},
+       {"key": "preference.cost_pp", "value": {"weight": -0.03, "unit": "USD"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4, "scope": "dining"},
+       {"key": "preference.table_confirmed", "value": {"weight": 0.5}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3, "scope": "dining"},
+       {"key": "behavior.compromise_tolerance", "value": 0.6, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.6, "scope": "group decisions"},
+       {"key": "behavior.initiative", "value": 0.8, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.5},
+       {"key": "behavior.deadline_sensitivity", "value": 0.3, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3}
+     ]},
+    {"user_id": "user_b", "display_name": "Person B", "token": "dev-token-user-b", "profile_id": "profile_user_b",
+     "onboarding": "I have coeliac disease. I will only eat somewhere that confirms gluten-free handling.",
+     "features": [
+       {"key": "constraint.gluten_safe", "value": {"op": "==", "value": true}, "status": "HARD_CONSTRAINT", "epistemic_confidence": "high", "relevance": 1.0, "scope": "dining", "note": "user-authorized hard boundary"},
+       {"key": "preference.cost_pp", "value": {"weight": -0.02, "unit": "USD"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3},
+       {"key": "preference.table_confirmed", "value": {"weight": 1.0}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.compromise_tolerance", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.5},
+       {"key": "behavior.initiative", "value": 0.4, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3},
+       {"key": "behavior.deadline_sensitivity", "value": null, "status": "UNKNOWN", "epistemic_confidence": "unknown", "relevance": 0.2}
+     ]},
+    {"user_id": "user_c", "display_name": "Person C", "token": "dev-token-user-c", "profile_id": "profile_user_c",
+     "onboarding": "Price matters most to me. When we're running out of time I'm usually the one who gives in.",
+     "features": [
+       {"key": "preference.cost_pp", "value": {"weight": -0.10, "unit": "USD"}, "status": "CONFIRMED", "epistemic_confidence": "high", "relevance": 1.0, "scope": "dining"},
+       {"key": "behavior.compromise_tolerance", "value": 0.2, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.6},
+       {"key": "behavior.deadline_sensitivity", "value": 0.9, "status": "INFERRED", "epistemic_confidence": "medium", "relevance": 0.6, "note": "self-described: concedes under time pressure"},
+       {"key": "behavior.initiative", "value": 0.6, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3}
+     ]},
+    {"user_id": "user_d", "display_name": "Person D", "token": "dev-token-user-d", "profile_id": "profile_user_d",
+     "onboarding": "I need to be there by 7:30 PM at the latest.",
+     "features": [
+       {"key": "constraint.est_arrival", "value": {"op": "<=", "value": "2026-10-24T19:30:00-07:00", "type": "timestamp"}, "status": "HARD_CONSTRAINT", "epistemic_confidence": "high", "relevance": 1.0, "scope": "this evening"},
+       {"key": "preference.cost_pp", "value": {"weight": -0.04, "unit": "USD"}, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.compromise_tolerance", "value": 0.5, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.4},
+       {"key": "behavior.initiative", "value": 0.3, "status": "INFERRED", "epistemic_confidence": "low", "relevance": 0.3},
+       {"key": "behavior.deadline_sensitivity", "value": null, "status": "UNKNOWN", "epistemic_confidence": "unknown", "relevance": 0.2}
+     ]}
+  ]
+}

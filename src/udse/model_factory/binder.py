@@ -32,20 +32,23 @@ def _is_slot(v: Any) -> bool:
 def collect_slots(template: Any) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
 
-    def walk(x):
+    def walk(x, label: str | None = None):
         if isinstance(x, dict):
             if _is_slot(x):
-                out.append(x)
+                out.append({**x, "_label": label} if label and "question" not in x else x)
                 return
             if "$requires" in x:
+                desc = (x.get("description") or x.get("label") or x.get("id") or "").split(" (")[0].rstrip(".")
                 out.append({"$claim": x["$requires"], "kind": x.get("$requires_kind", "MECHANISM"),
+                            "question": f"Is there external evidence for: {desc[:1].lower()}{desc[1:]}?" if desc else None,
                             "why": x.get("$requires_why", "evidence needed before this mechanism may be included"),
                             "requires": True})
+            here = x.get("label") or (x.get("description") if "id" in x and "unit" in x else None)
             for v in x.values():
-                walk(v)
+                walk(v, here or label)
         elif isinstance(x, list):
             for v in x:
-                walk(v)
+                walk(v, label)
 
     walk(template)
     return out
@@ -59,7 +62,7 @@ def slot_research_needs(template: dict[str, Any]) -> list[dict[str, Any]]:
         subj, _, pred = s["$claim"].rpartition(".")
         needs.append({
             "kind": s.get("kind", ResearchNeedKind.INITIAL_CONDITION.value),
-            "question": s.get("question") or f"What is the current {pred.replace('_', ' ')} for {subj}?",
+            "question": s.get("question") or (f"Find: {s['_label']}" if s.get("_label") else f"What is the current {pred.replace('_', ' ')} for {subj}?"),
             "target_refs": [s["$claim"]] + s.get("topics", []),
             "why": s.get("why", "grounds a state variable of the decision model"),
             "critical": bool(s.get("critical")),

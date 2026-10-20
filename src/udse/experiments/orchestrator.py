@@ -383,10 +383,10 @@ class Orchestrator:
             prev = it.status
             if matched_d:
                 it.status = CoverageStatus.DEPTH_SIMULATED
-                it.status_reason = f"{len(matched_d)} detailed trajectory(ies) with pinned model v{model.model_version}"
+                it.status_reason = f"{len(matched_d)} detailed {'trajectory' if len(matched_d) == 1 else 'trajectories'} with pinned model v{model.model_version}"
             elif matched_s:
                 it.status = CoverageStatus.LOW_FIDELITY_EXPLORED
-                it.status_reason = f"{len(matched_s)} screening run(s); exploratory preview only"
+                it.status_reason = f"{len(matched_s)} screening {'run' if len(matched_s) == 1 else 'runs'}; exploratory preview only"
             elif it.policy_id and any(a.policy_id == it.policy_id for a in set_aside):
                 it.status = CoverageStatus.SET_ASIDE_BUDGET
                 it.status_reason = "not explored within the approved budget (not infeasible)"

@@ -27,7 +27,7 @@ def test_evidence_freshness_leads_injection_and_unknowns(restaurant):
     assert st["r_a.opens_at"].epistemic_tier == FidelityTier.A_GROUNDED
     assert st["r_b.price_pp"].epistemic_tier == FidelityTier.B_ASSUMPTION_BOUND       # stale → downgraded, visible
     needs = {n.question: n.status for n in res.needs}
-    assert any("table for 4 at 1900 for r_c" in q and s == "UNRESOLVED" for q, s in needs.items())
+    assert any("R-C table for 4 at 19:00" in q and s == "UNRESOLVED" for q, s in needs.items())
 
 
 def test_no_invented_live_table_and_no_unsafe_dietary_claim(restaurant):

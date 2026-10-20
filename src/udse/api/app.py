@@ -34,6 +34,7 @@ from ..model_ir.schemas import (
     Intervention,
 )
 from ..trajectory_analytics.analytics import Analytics
+from ..trajectory_analytics.futures import FuturesView
 
 WEB_DIR = Path(__file__).resolve().parents[1] / "web" / "static"
 
@@ -100,6 +101,7 @@ def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo
     if seed_demo:
         seed_demo_decisions(eng)
     analytics = Analytics(eng.store)
+    futures_view = FuturesView(eng.store)
     pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="udse-job")
     api_cred = eng.creds[Role.API]
     app = FastAPI(title="Universal Decision Simulation Engine", version="0.5.0",
@@ -273,6 +275,22 @@ def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo
             it["ui_label"] = COVERAGE_UI_LABEL[CoverageStatus(it["status"])]
         return fr
 
+    @app.get("/v1/decisions/{decision_id}/futures")
+    def futures(decision_id: str, version: int | None = None, light: bool = False, user=Depends(current_user)):
+        require_access(decision_id, user)
+        try:
+            return futures_view.futures(decision_id, version, light)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+
+    @app.get("/v1/decisions/{decision_id}/world-model")
+    def world_model(decision_id: str, version: int | None = None, user=Depends(current_user)):
+        require_access(decision_id, user)
+        try:
+            return futures_view.world_model(decision_id, version)
+        except KeyError as e:
+            raise HTTPException(404, str(e)) from e
+
     @app.get("/v1/decisions/{decision_id}/evidence")
     def evidence(decision_id: str, user=Depends(current_user)):
         require_access(decision_id, user)
@@ -348,7 +366,7 @@ def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo
     @app.get("/v1/runs/{run_id}/why/{seq}")
     def why(run_id: str, seq: int, user=Depends(current_user)):
         run_access(run_id, user)
-        return analytics.why(run_id, seq)
+        return futures_view.plain_why(run_id, analytics.why(run_id, seq))
 
     @app.get("/v1/runs/{run_id}/explain")
     def explain(run_id: str, user=Depends(current_user)):

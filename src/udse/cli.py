@@ -17,7 +17,7 @@ def _serve(args: argparse.Namespace) -> None:
 
     os.environ.setdefault("UDSE_DB", args.db)
     eng = Engine(args.db, use_env_llm=args.llm)
-    app = create_app(eng, dev_mode=True, seed_demo=not args.no_demo)
+    app = create_app(eng, dev_mode=True, seed_demo=not args.no_demo, cors_origins=args.cors_origin or None)
     print(f"UDSE v0.5 serving on http://{args.host}:{args.port}  (db={args.db}, llm={'on' if eng.llm else 'offline'})")
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
 
@@ -65,6 +65,8 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--db", default=str(Path("var") / "udse.sqlite3"))
     s.add_argument("--no-demo", action="store_true", help="do not seed and run the fixture decisions")
     s.add_argument("--llm", action="store_true", help="use Claude when UDSE_LLM=anthropic and credentials are configured")
+    s.add_argument("--cors-origin", action="append", metavar="ORIGIN",
+                   help="allow this origin to call the API cross-origin (repeatable; default: UDSE_CORS_ORIGINS or none)")
     s.set_defaults(fn=_serve)
     d = sub.add_parser("demo", help="run one fixture end to end in the terminal")
     d.add_argument("fixture", choices=["restaurant", "fundraising", "garden"])

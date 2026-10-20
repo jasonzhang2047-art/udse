@@ -92,3 +92,15 @@ def test_budget_set_aside_is_not_infeasible():
     fr = CoverageFrontier.model_validate(eng.store.get_frontier(spec.decision_id))
     aside = [i for i in fr.items if i.status == CoverageStatus.SET_ASIDE_BUDGET]
     assert aside and all("not infeasible" in i.status_reason for i in aside)
+
+
+def test_cors_is_off_unless_origins_are_configured(client, monkeypatch):
+    origin = {"Origin": "http://localhost:8081"}
+    assert "access-control-allow-origin" not in client.get("/health", headers=origin).headers
+    monkeypatch.delenv("UDSE_CORS_ORIGINS", raising=False)
+    with TestClient(create_app(Engine(":memory:", FIX), cors_origins=["http://localhost:8081"])) as c:
+        assert c.get("/health", headers=origin).headers["access-control-allow-origin"] == "http://localhost:8081"
+        pre = c.options("/v1/decisions", headers={**origin, "Access-Control-Request-Method": "GET",
+                                                   "Access-Control-Request-Headers": "authorization"})
+        assert pre.status_code == 200
+        assert "access-control-allow-origin" not in c.get("/health", headers={"Origin": "http://evil.example"}).headers

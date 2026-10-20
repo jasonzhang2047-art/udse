@@ -16,6 +16,7 @@ uv sync
 uv run pytest                      # 55 acceptance tests (§15.3, Appendix C)
 uv run udse demo fundraising       # terminal walkthrough: research → model → runs → replay
 uv run udse serve                  # API + mobile-first web client on http://127.0.0.1:8765
+(cd apps/mobile && npm install && npx expo start --web)   # native Expo client (web target)
 ```
 
 `udse serve` seeds the registry, fixture users and three decisions (restaurant, fundraising,
@@ -68,13 +69,14 @@ never feed evidence ingestion. The compiler, not the model, decides what is vali
 | §14.6 Storage + tenancy | `udse.storage` | per-table writer roles, HMAC service credentials, append-only tables, provenance triggers, audit log |
 | §14.7 API | `udse.api` | FastAPI, async idempotent jobs |
 | §13 Mobile UX | `udse/web/static` | mobile-first web client: decisions, model coverage, evidence, frontier, timeline scrubber, divergence, profile approvals, boundary log |
+| §13 Native app | `apps/mobile` | React Native + Expo + TypeScript (Expo Router) client for the same API, centred on the Futures map. See `apps/mobile/README.md`. |
 
 Fixtures live in `fixtures/` (registry seed, restaurant, fundraising, clean-room and high-stakes decisions).
 See `docs/adr/README.md` for the ADR register and `docs/postgres-mapping.md` for the production database mapping.
 
 ## Deliberate scope limits (not silently implied)
 
-- **Native app:** the spec recommends React Native + Expo. This build ships a mobile-first web client over the same API; the Expo app is follow-up work.
+- **Native app:** `apps/mobile` is the React Native + Expo client the spec recommends. It has been verified on the web target (`npx expo start --web`), but not yet on an iOS or Android device.
 - **Database:** SQLite with the same logical tables, role matrix and triggers stands in for PostgreSQL + RLS (mapping documented).
 - **Live research:** source adapters for fixtures and user attachments are implemented; a live web/provider adapter is an interface, not a connector.
 - **Auth:** development bearer tokens for fixture users; production sign-in, guest links and notifications are out of scope.

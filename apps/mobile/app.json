@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "UDSE Futures",
+    "slug": "udse-mobile",
+    "version": "0.5.0",
+    "scheme": "udse",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "dev.udse.mobile"
+    },
+    "android": {
+      "package": "dev.udse.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0c11",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -95,7 +96,13 @@ class ProposalRequest(BaseModel):
     evidence_event_id: str
 
 
-def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo: bool = False) -> FastAPI:
+def cors_origins_from_env() -> list[str]:
+    """Origins allowed to call the API cross-origin (e.g. the Expo web client), from ``UDSE_CORS_ORIGINS``."""
+    return [o.strip() for o in os.environ.get("UDSE_CORS_ORIGINS", "").split(",") if o.strip()]
+
+
+def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo: bool = False,
+               cors_origins: list[str] | None = None) -> FastAPI:
     eng = engine or Engine(os.environ.get("UDSE_DB", ":memory:"))
     eng.seed_fixtures()
     if seed_demo:
@@ -107,6 +114,11 @@ def create_app(engine: Engine | None = None, *, dev_mode: bool = True, seed_demo
     app = FastAPI(title="Universal Decision Simulation Engine", version="0.5.0",
                   description="Evidence-grounded, decision-scoped world models with an event-sourced temporal kernel.")
     app.state.engine = eng
+    # Off unless origins are configured: same-origin clients (the bundled web client, native apps) never need it.
+    origins = cors_origins_from_env() if cors_origins is None else cors_origins
+    if origins:
+        app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST", "PATCH"],
+                           allow_headers=["Authorization", "Content-Type"])
 
     # ---------------- auth ----------------
     def current_user(authorization: str | None = Header(default=None)) -> dict[str, Any]:

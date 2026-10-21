@@ -81,7 +81,19 @@ saved results from the sign-in screen.
 ## Not done / known limits
 
 - Verified with `expo start --web` against a local backend, at phone (375pt) and desktop widths, in both
-  themes. Not yet run on an iOS or Android device or simulator.
+  themes.
+- Native: the iOS and Android bundles build (`npx expo export --platform ios --platform android`), but the
+  app has not yet run on a simulator or device. The machine used so far had no full Xcode and no Android SDK.
+  These native-only problems were found by reading the code and React Native's iOS sources. They are fixed,
+  but the fixes have only been checked on the web build:
+  - The Futures tab uses one sheet whose content changes, so going from a split to a comparison doesn't
+    open a modal while another is closing. iOS drops a modal presented during another's dismissal.
+  - The scrubbers hold the page still while dragged. On iOS a vertical drift would otherwise scroll the
+    page and cancel the drag.
+  - Sheets move above the keyboard on iOS. Their buttons respond on the first tap while the keyboard is open.
+  - The correction's feature key and JSON fields turn off autocorrect, and the JSON field accepts iOS smart
+    quotes.
+  - Signed out, the sign-in screen has no header, so it now clears the status bar and notch itself.
 - Production sign-in, push notifications and guest links are out of scope, as they are for the backend.
 - Expo's web output is a single-page app. Deep links work under `expo start`. A static host needs a
   fallback to `index.html`.

@@ -50,7 +50,9 @@ export function Reaction({ decisionId, runIds, pathLabel }: { decisionId: string
   const submitCorrection = () => {
     let parsed: unknown = value || null;
     try {
-      parsed = value ? JSON.parse(value) : null;
+      // iOS smart punctuation can turn typed straight quotes into curly ones, which JSON.parse rejects.
+      const json = value.replace(/[\u201C\u201D\u201E\u201F]/g, '"').replace(/[\u2018\u2019]/g, "'");
+      parsed = value ? JSON.parse(json) : null;
     } catch {
       // keep the text as written
     }
@@ -108,6 +110,8 @@ export function Reaction({ decisionId, runIds, pathLabel }: { decisionId: string
             placeholder="constraint.founder_control_retained"
             placeholderTextColor={c.faint}
             autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
             style={[input, { fontFamily: fonts.mono, fontSize: 13 }]}
             accessibilityLabel="Feature key"
           />
@@ -117,6 +121,8 @@ export function Reaction({ decisionId, runIds, pathLabel }: { decisionId: string
             placeholder='{"op": "==", "value": true}'
             placeholderTextColor={c.faint}
             autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
             style={[input, { fontFamily: fonts.mono, fontSize: 13 }]}
             accessibilityLabel="Feature value as JSON"
           />

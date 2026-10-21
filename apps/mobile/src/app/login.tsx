@@ -19,7 +19,7 @@ const GROUP_NAMES: Record<string, string> = {
 
 export default function Login() {
   const { c, mode, setMode } = useTheme();
-  const { signIn, me, baseUrl, setBaseUrl } = useSession();
+  const { signIn, me, status, baseUrl, setBaseUrl } = useSession();
   const users = useApi<DevUsers>('/v1/dev/users');
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<Error | null>(null);
@@ -42,7 +42,8 @@ export default function Login() {
   };
 
   return (
-    <Screen maxWidth={900}>
+    // Signed out, this screen has no header, so it must clear the status bar / notch itself.
+    <Screen maxWidth={900} safeTop={status !== 'signedIn'}>
       <T v="eyebrow">Development sign-in</T>
       <T v="display" accessibilityRole="header" style={{ marginTop: 6 }}>
         Whose futures are we exploring?

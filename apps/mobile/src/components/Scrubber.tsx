@@ -1,11 +1,11 @@
 /* Accessible scrubber: drag the track, or use the step buttons (keyboard, switch access, screen readers). */
 
 import { useMemo, useRef, useState } from 'react';
-import { PanResponder, View } from 'react-native';
+import { PanResponder, Platform, View } from 'react-native';
 
 import { useTheme } from '@/lib/theme';
 
-import { Button, Row } from './ui';
+import { Button, Row, useScrollLock } from './ui';
 
 export function Scrubber({
   value,
@@ -29,6 +29,9 @@ export function Scrubber({
   steps?: number;
 }) {
   const { c } = useTheme();
+  // Native only: on the web, hiding the page's overflow mid-drag can shift the layout by a scrollbar width.
+  const lockScroll = useScrollLock();
+  const lock = Platform.OS === 'web' ? () => {} : lockScroll;
   const [width, setWidth] = useState(1);
   const start = useRef(0);
   const last = useRef(value);
@@ -40,8 +43,8 @@ export function Scrubber({
   const fromX = (x: number) => clamp(min + (Math.min(width, Math.max(0, x)) / width) * range);
 
   // Refs keep the responder stable while props change during a drag.
-  const live = useRef({ fromX, onChange, onCommit });
-  live.current = { fromX, onChange, onCommit };
+  const live = useRef({ fromX, onChange, onCommit, lock });
+  live.current = { fromX, onChange, onCommit, lock };
   const pan = useMemo(
     () =>
       PanResponder.create({
@@ -49,6 +52,7 @@ export function Scrubber({
         onMoveShouldSetPanResponder: () => true,
         onPanResponderTerminationRequest: () => false,
         onPanResponderGrant: (e) => {
+          live.current.lock(true);
           start.current = e.nativeEvent.locationX;
           last.current = live.current.fromX(start.current);
           live.current.onChange(last.current);
@@ -57,8 +61,14 @@ export function Scrubber({
           last.current = live.current.fromX(start.current + g.dx);
           live.current.onChange(last.current);
         },
-        onPanResponderRelease: () => live.current.onCommit?.(last.current),
-        onPanResponderTerminate: () => live.current.onCommit?.(last.current),
+        onPanResponderRelease: () => {
+          live.current.lock(false);
+          live.current.onCommit?.(last.current);
+        },
+        onPanResponderTerminate: () => {
+          live.current.lock(false);
+          live.current.onCommit?.(last.current);
+        },
       }),
     [],
   );

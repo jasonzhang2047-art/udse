@@ -1,10 +1,12 @@
 /* Small UI kit. All text scales with the OS font size (Dynamic Type / browser zoom): nothing sets
  * allowFontScaling={false} and text containers never have fixed heights. */
 
-import type { ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -44,29 +46,41 @@ export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Varia
 }
 
 /* ------------------------------------------------------------------ layout */
+/* Lets a drag inside a Screen (the scrubbers) hold the page still. On iOS a scroll view only yields to a
+ * touch handler that is its ancestor, so a drag that drifts vertically would scroll the page and cancel itself. */
+const ScrollLock = createContext<(locked: boolean) => void>(() => {});
+export const useScrollLock = () => useContext(ScrollLock);
+
 export function Screen({
   children,
   onRefresh,
   refreshing = false,
   maxWidth = 1120,
   padBottom = true,
+  safeTop = false,
 }: {
   children: ReactNode;
   onRefresh?: () => void;
   refreshing?: boolean;
   maxWidth?: number;
   padBottom?: boolean;
+  /** Pad below the status bar / notch; for screens shown without a navigation header. */
+  safeTop?: boolean;
 }) {
   const { c } = useTheme();
   const insets = useSafeAreaInsets();
+  const [locked, setLocked] = useState(false);
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: padBottom ? 40 + insets.bottom : 16 }}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14 + (safeTop ? insets.top : 0), paddingBottom: padBottom ? 40 + insets.bottom : 16 }}
       refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.present} /> : undefined}
       keyboardShouldPersistTaps="handled"
+      scrollEnabled={!locked}
     >
-      <View style={{ width: '100%', maxWidth, alignSelf: 'center' }}>{children}</View>
+      <ScrollLock.Provider value={setLocked}>
+        <View style={{ width: '100%', maxWidth, alignSelf: 'center' }}>{children}</View>
+      </ScrollLock.Provider>
     </ScrollView>
   );
 }
@@ -444,7 +458,11 @@ export function Sheet({ visible, onClose, title, children }: { visible: boolean;
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType={reduceMotion ? 'none' : 'slide'} onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
+      {/* iOS: lift the sheet above the keyboard so its text fields and buttons stay reachable. */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}
+      >
         <Pressable accessibilityLabel="Close" style={StyleSheet.absoluteFill} onPress={onClose} />
         <View
           accessibilityViewIsModal
@@ -467,9 +485,11 @@ export function Sheet({ visible, onClose, title, children }: { visible: boolean;
             </T>
             <Button small kind="ghost" label="Close" onPress={onClose} />
           </Row>
-          <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 6 }}>{children}</ScrollView>
+          <ScrollView contentContainerStyle={{ padding: 16, paddingTop: 6 }} keyboardShouldPersistTaps="handled">
+            {children}
+          </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

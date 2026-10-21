@@ -123,16 +123,40 @@ function FuturesView({
 
   /** Divergence of two threads' representative runs (GET /v1/runs/{a}/compare/{b}). */
   const compareTwo = async (a: string, b: string) => {
-    setNexus(null);
     setCmpErr(null);
     try {
       const cmp = await api.get<Compare>(`/v1/runs/${byId[a].rep_run_id}/compare/${byId[b].rep_run_id}`);
+      // Same render as the comparison, so a split sheet turns into the comparison instead of closing first.
+      setNexus(null);
       set({ compare: { a, b, cmp }, picked: [], focus: null });
     } catch (e) {
+      setNexus(null);
       setCmpErr((e as Error).message);
       set({ picked: [] });
     }
   };
+
+  /* One sheet for the story, moments, splits and possibilities. iOS can't present a modal while another is
+   * being dismissed, so moving from one view to the next swaps this sheet's content instead. */
+  const sheet = !focused ? null : beads ? 'moment' : nexus ? 'nexus' : ghost ? 'ghost' : !wide && story ? 'story' : null;
+  const closeSheet = () => {
+    if (sheet === 'moment') setBeads(null);
+    else if (sheet === 'nexus') setNexus(null);
+    else if (sheet === 'ghost') setGhost(null);
+    else set({ focus: null, compare: null });
+  };
+  const sheetTitle =
+    sheet === 'moment'
+      ? 'Moment'
+      : sheet === 'nexus'
+        ? 'What happened differently here'
+        : sheet === 'ghost'
+          ? ghost?.label || 'Possibility'
+          : o.compare
+            ? 'Compare two paths'
+            : o.focus
+              ? `Path ${keyNo[o.focus]}`
+              : '';
 
   /* readout at the time cursor */
   const visible = useMemo(() => visibleThreads(data, o), [data, o]);
@@ -308,15 +332,6 @@ function FuturesView({
           ) : (
             mapCard
           )}
-          {/* Below 1000pt the story and comparison open as a bottom sheet (design §8). */}
-          <Sheet
-            visible={focused && !wide && !!story}
-            onClose={() => set({ focus: null, compare: null })}
-            title={o.compare ? 'Compare two paths' : o.focus ? `Path ${keyNo[o.focus]}` : ''}
-          >
-            {!wide ? storyPanel : null}
-          </Sheet>
-
           {!o.compare ? (
             <Card>
               <Row between>
@@ -352,61 +367,12 @@ function FuturesView({
       <Ghosts data={data} onGhost={setGhost} onAll={() => goTab('possibilities')} />
       <AllRuns runs={runs} />
 
-      <Sheet visible={focused && !!beads} onClose={() => setBeads(null)} title="Moment">
-        {beads ? <MomentCard t={beads.t} m={beads.m} n={keyNo[beads.t.thread_id]} color={colorOf(beads.t)} res={res} /> : null}
-      </Sheet>
-      <Sheet visible={focused && !!nexus} onClose={() => setNexus(null)} title="What happened differently here">
-        {nexus ? (
-          <View style={{ gap: 12 }}>
-            <T v="eyebrow">Paths split · {fmtTime(nexus.kids[0].split_at, res, true)}</T>
-            {nexus.kids.map((t) => {
-              const parent = byId[t.parent || ''];
-              if (!parent) return null;
-              return (
-                <Card key={t.thread_id}>
-                  <Row gap={6}>
-                    <Dot color={colorOf(parent)} />
-                    <T v="small" color={c.text} style={{ fontWeight: '600' }}>
-                      {keyNo[parent.thread_id]}. {parent.label}
-                    </T>
-                  </Row>
-                  <T v="small">{t.first_difference?.parent || '—'}</T>
-                  <Row gap={6} style={{ marginTop: 10 }}>
-                    <Dot color={colorOf(t)} />
-                    <T v="small" color={c.text} style={{ fontWeight: '600' }}>
-                      {keyNo[t.thread_id]}. {t.label}
-                    </T>
-                  </Row>
-                  <T v="small">{t.first_difference?.self || '—'}</T>
-                  {t.carries.length ? <T v="tiny">{t.carries.join(' · ')}</T> : null}
-                  <Row between style={{ marginTop: 8 }}>
-                    <T v="tiny">{t.shared_events || 0} shared moments of history before this split</T>
-                    <Button small label="Compare these two" onPress={() => compareTwo(parent.thread_id, t.thread_id)} />
-                  </Row>
-                </Card>
-              );
-            })}
-          </View>
-        ) : null}
-      </Sheet>
-      <Sheet visible={focused && !!ghost} onClose={() => setGhost(null)} title={ghost?.label || 'Possibility'}>
-        {ghost ? (
-          <View style={{ gap: 10 }}>
-            <Pill tone={ghost.kind === 'ruled_out' ? 'bad' : 'default'}>
-              {
-                {
-                  ruled_out: 'Ruled out by an evidenced rule',
-                  set_aside: 'Set aside by the budget — not infeasible',
-                  reopened: 'Reopened after new evidence',
-                  unsimulated: 'Identified, not simulated',
-                }[ghost.kind]
-              }
-            </Pill>
-            <T v="lede">{humanize(ghost.why)}.</T>
-            {ghost.citation.length ? <T v="small">Evidence cited: {ghost.citation.join(', ')}</T> : null}
-            <T v="tiny">Nothing on the map should be read as exhaustive. Possibilities can exist that nobody identified.</T>
-          </View>
-        ) : null}
+      {/* Below 1000pt the story and comparison open in this bottom sheet too (design §8). */}
+      <Sheet visible={!!sheet} onClose={closeSheet} title={sheetTitle}>
+        {sheet === 'moment' && beads ? <MomentCard t={beads.t} m={beads.m} n={keyNo[beads.t.thread_id]} color={colorOf(beads.t)} res={res} /> : null}
+        {sheet === 'nexus' && nexus ? <NexusCard nexus={nexus} byId={byId} keyNo={keyNo} colorOf={colorOf} res={res} onCompare={compareTwo} /> : null}
+        {sheet === 'ghost' && ghost ? <GhostCard ghost={ghost} /> : null}
+        {sheet === 'story' ? storyPanel : null}
       </Sheet>
     </View>
   );
@@ -584,6 +550,77 @@ function MomentCard({ t, m, n, color, res }: { t: Thread; m: Moment; n: number; 
         onPress={() => router.push({ pathname: '/run/[id]', params: { id: t.rep_run_id, seq: m.seq !== null ? String(m.seq) : undefined } })}
         style={{ marginTop: 10 }}
       />
+    </View>
+  );
+}
+
+/** Where paths split: what each side did differently, with a shortcut to compare the two. */
+function NexusCard({
+  nexus,
+  byId,
+  keyNo,
+  colorOf,
+  res,
+  onCompare,
+}: {
+  nexus: Nexus;
+  byId: Record<string, Thread>;
+  keyNo: Record<string, number>;
+  colorOf: (t: { family: string }) => string;
+  res: string;
+  onCompare: (a: string, b: string) => void;
+}) {
+  const { c } = useTheme();
+  return (
+    <View style={{ gap: 12 }}>
+      <T v="eyebrow">Paths split · {fmtTime(nexus.kids[0].split_at, res, true)}</T>
+      {nexus.kids.map((t) => {
+        const parent = byId[t.parent || ''];
+        if (!parent) return null;
+        return (
+          <Card key={t.thread_id}>
+            <Row gap={6}>
+              <Dot color={colorOf(parent)} />
+              <T v="small" color={c.text} style={{ fontWeight: '600' }}>
+                {keyNo[parent.thread_id]}. {parent.label}
+              </T>
+            </Row>
+            <T v="small">{t.first_difference?.parent || '—'}</T>
+            <Row gap={6} style={{ marginTop: 10 }}>
+              <Dot color={colorOf(t)} />
+              <T v="small" color={c.text} style={{ fontWeight: '600' }}>
+                {keyNo[t.thread_id]}. {t.label}
+              </T>
+            </Row>
+            <T v="small">{t.first_difference?.self || '—'}</T>
+            {t.carries.length ? <T v="tiny">{t.carries.join(' · ')}</T> : null}
+            <Row between style={{ marginTop: 8 }}>
+              <T v="tiny">{t.shared_events || 0} shared moments of history before this split</T>
+              <Button small label="Compare these two" onPress={() => onCompare(parent.thread_id, t.thread_id)} />
+            </Row>
+          </Card>
+        );
+      })}
+    </View>
+  );
+}
+
+function GhostCard({ ghost }: { ghost: Ghost }) {
+  return (
+    <View style={{ gap: 10 }}>
+      <Pill tone={ghost.kind === 'ruled_out' ? 'bad' : 'default'}>
+        {
+          {
+            ruled_out: 'Ruled out by an evidenced rule',
+            set_aside: 'Set aside by the budget — not infeasible',
+            reopened: 'Reopened after new evidence',
+            unsimulated: 'Identified, not simulated',
+          }[ghost.kind]
+        }
+      </Pill>
+      <T v="lede">{humanize(ghost.why)}.</T>
+      {ghost.citation.length ? <T v="small">Evidence cited: {ghost.citation.join(', ')}</T> : null}
+      <T v="tiny">Nothing on the map should be read as exhaustive. Possibilities can exist that nobody identified.</T>
     </View>
   );
 }

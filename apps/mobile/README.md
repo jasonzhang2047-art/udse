@@ -64,8 +64,10 @@ default.
 - **Tiers describe evidence support, not accuracy.** The four-step meters and their words never show a
   percentage, never average, and every screen that uses them says so.
 - **Run counts are never odds.** Counts are labelled as coverage. Nothing ranks paths by frequency.
-- **Large text.** All text scales with the OS font size (Dynamic Type, Android font scale, browser zoom).
-  Containers grow with their text, and buttons are 34–44pt tall.
+- **Large text.** Screen text scales with the OS font size (Dynamic Type, Android font scale, browser
+  zoom), body text without a cap. Headings follow iOS's gentler title curve. Containers grow with their
+  text, and buttons are at least 34–44pt tall. The tab bar, the headers and the fixed-size badges (avatar
+  initials, path numbers) keep their size, as iOS's own bars do.
 - **Reduced motion.** The OS setting (`prefers-reduced-motion` on the web) turns off the map fade-in,
   sheet slides and screen transitions.
 - **Accessibility.** The map is an image with a text summary. The path list below it is the full
@@ -80,20 +82,44 @@ saved results from the sign-in screen.
 
 ## Not done / known limits
 
-- Verified with `expo start --web` against a local backend, at phone (375pt) and desktop widths, in both
-  themes.
-- Native: the iOS and Android bundles build (`npx expo export --platform ios --platform android`), but the
-  app has not yet run on a simulator or device. The machine used so far had no full Xcode and no Android SDK.
-  These native-only problems were found by reading the code and React Native's iOS sources. They are fixed,
-  but the fixes have only been checked on the web build:
-  - The Futures tab uses one sheet whose content changes, so going from a split to a comparison doesn't
-    open a modal while another is closing. iOS drops a modal presented during another's dismissal.
-  - The scrubbers hold the page still while dragged. On iOS a vertical drift would otherwise scroll the
-    page and cancel the drag.
-  - Sheets move above the keyboard on iOS. Their buttons respond on the first tap while the keyboard is open.
-  - The correction's feature key and JSON fields turn off autocorrect, and the JSON field accepts iOS smart
-    quotes.
-  - Signed out, the sign-in screen has no header, so it now clears the status bar and notch itself.
+- Web: verified with `expo start --web` against a local backend, at phone (375pt) and desktop widths, in
+  both themes.
+- iOS: run in Expo Go on the iOS 27.0 simulator (iPhone 17, 402×874pt, Dynamic Island) against a
+  local `udse serve`, signed in as Founder A. The whole fundraising flow works there:
+  - the vertical Futures map, with taps on thread keys, beads, the nexus and the thread hit paths;
+  - the time-cursor drag (with vertical wobble) and the metric lens;
+  - a nexus turning into "Compare two paths", then the divergence view;
+  - the Evidence, World model (tap an outcome), Possibilities and Setup tabs;
+  - the timeline explorer: scrubber, state panel, event sheet with "Why did this happen?" and the
+    promotion check;
+  - "My Agent wouldn't do that…" from the nested sheet, approve in Your Agent, then roll back;
+  - Integrity, the back button, the edge swipe-back, and AsyncStorage keeping the session across reloads.
+  - An early run on an iPhone Duo simulator (sensor housing on the right edge) also checked the side
+    safe-area insets. That simulator's runtime later became unavailable.
+- Dynamic Type at the largest accessibility size (AX5) and Reduce Motion were checked on iOS. Reduce
+  Motion is checked as the setting reaching the app; the transitions weren't timed frame by frame.
+- Fixed for native in this pass:
+  - One switching sheet on the Futures tab. iOS drops a modal presented while another is dismissing.
+  - The scrubber holds the page still while dragged.
+  - Sheets lift above the keyboard.
+  - No autocorrect on the correction's key and JSON fields, and iOS smart quotes are accepted in the JSON.
+  - Sign-in clears the notch when signed out.
+  - Side safe-area insets are respected.
+  - The map's invisible tap targets are fully transparent. At opacity 0.01, iOS drew them as grey halos.
+  - On the two screens with scrubbers, back is an edge swipe only. iOS 26+ otherwise pops on any rightward
+    drag.
+  - At large text sizes, headings follow iOS's title curve and badges keep their size. Wrapped buttons and
+    pills keep their text inside the border.
+- Not verified natively:
+  - Android. The bundle builds, but no emulator was available. In particular, the keyboard in sheets is
+    only handled on iOS so far (Android 15+ is edge-to-edge).
+  - A physical device.
+  - A development build (`expo run:ios`). Expo Go was enough.
+  - iPad and landscape widths.
+  - Dark mode on device.
+- Map labels inside the SVG don't scale with Dynamic Type. The map is an image with a text summary, and
+  the path list below it is the scalable, accessible equivalent. The native stack header title also stays
+  at a fixed size, as it does in iOS's own apps.
 - Production sign-in, push notifications and guest links are out of scope, as they are for the backend.
 - Expo's web output is a single-page app. Deep links work under `expo start`. A static host needs a
   fallback to `index.html`.

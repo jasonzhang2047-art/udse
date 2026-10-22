@@ -476,7 +476,9 @@ export function FuturesMap({
       els.push(
         <G key={`b${t.thread_id}:${m.i}`} opacity={dimOp(t.thread_id)} {...press(`bead:${t.thread_id}:${m.i}`, () => onBead(t, m))}>
           {shape}
-          <Circle cx={x} cy={y} r={11} fill={c.bg} fillOpacity={0.01} />
+          {/* Invisible tap target. Opacity 0, not 0.01: on iOS stacked near-transparent circles showed as grey halos.
+           * Hit-testing uses the shape, not the paint, so it still receives taps (iOS, Android and the web). */}
+          <Circle cx={x} cy={y} r={11} fill={c.bg} fillOpacity={0} />
         </G>,
       );
     }
@@ -487,7 +489,7 @@ export function FuturesMap({
     els.push(
       <G key={`nx${nx.key}`} {...press(`nexus:${nx.key}`, () => onNexus(nx))}>
         <Circle cx={nx.x} cy={nx.y} r={nx.kids.length > 1 ? 6 : 5} fill={c.bg} stroke={c.present} strokeWidth={pulse ? 3 : 2} />
-        <Circle cx={nx.x} cy={nx.y} r={13} fill={c.bg} fillOpacity={0.01} />
+        <Circle cx={nx.x} cy={nx.y} r={13} fill={c.bg} fillOpacity={0} />
       </G>,
     );
   });

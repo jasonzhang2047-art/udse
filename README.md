@@ -76,7 +76,7 @@ See `docs/adr/README.md` for the ADR register and `docs/postgres-mapping.md` for
 
 ## Deliberate scope limits (not silently implied)
 
-- **Native app:** `apps/mobile` is the React Native + Expo client the spec recommends. It has been verified on the web target (`npx expo start --web`), but not yet on an iOS or Android device.
+- **Native app:** `apps/mobile` is the React Native + Expo client the spec recommends. It has been verified on the web target (`npx expo start --web`) and in Expo Go on the iOS simulator. It has not yet run on Android or on a physical device; see `apps/mobile/README.md`.
 - **Database:** SQLite with the same logical tables, role matrix and triggers stands in for PostgreSQL + RLS (mapping documented).
 - **Live research:** source adapters for fixtures and user attachments are implemented; a live web/provider adapter is an interface, not a connector.
 - **Auth:** development bearer tokens for fixture users; production sign-in, guest links and notifications are out of scope.

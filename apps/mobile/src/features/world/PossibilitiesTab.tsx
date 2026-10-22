@@ -93,7 +93,7 @@ export function PossibilitiesTab({
                     onPress={() => goTab('futures', { run: r })}
                     style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: colorOf[r], alignItems: 'center', justifyContent: 'center' }}
                   >
-                    <T v="tiny" color={c.onOutcome} style={{ fontWeight: '700' }}>
+                    <T v="tiny" color={c.onOutcome} style={{ fontWeight: '700' }} allowFontScaling={false}>
                       {pathOf[r]}
                     </T>
                   </Pressable>

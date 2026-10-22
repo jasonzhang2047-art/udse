@@ -474,7 +474,7 @@ function PathRow({
       })}
     >
       <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: color, alignItems: 'center', justifyContent: 'center', marginTop: 1 }}>
-        <T v="tiny" color={c.onOutcome} style={{ fontWeight: '700' }}>
+        <T v="tiny" color={c.onOutcome} style={{ fontWeight: '700' }} allowFontScaling={false}>
           {n}
         </T>
       </View>

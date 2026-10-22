@@ -4,9 +4,11 @@ import { Pressable, Text, type ColorValue } from 'react-native';
 import { useSession } from '@/lib/session';
 import { fonts, useTheme } from '@/lib/theme';
 
+/* Header and tab bar chrome keeps a fixed size, as iOS's own bars do: at the largest Dynamic Type sizes
+ * the fixed-height bars otherwise clip it. Screen content still scales without a cap. */
 function Glyph({ g, color }: { g: string; color: ColorValue }) {
   return (
-    <Text accessible={false} style={{ color, fontSize: 18, lineHeight: 22 }}>
+    <Text accessible={false} allowFontScaling={false} style={{ color, fontSize: 18, lineHeight: 22 }}>
       {g}
     </Text>
   );
@@ -22,7 +24,7 @@ function Who() {
       onPress={() => router.push('/login')}
       style={{ marginRight: 12, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6, maxWidth: 200 }}
     >
-      <Text numberOfLines={1} style={{ color: c.text, fontFamily: fonts.sans, fontSize: 13 }}>
+      <Text numberOfLines={1} allowFontScaling={false} style={{ color: c.text, fontFamily: fonts.sans, fontSize: 13 }}>
         {me?.display_name ?? 'Sign in'}
       </Text>
     </Pressable>
@@ -37,6 +39,8 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: c.surface },
         headerTintColor: c.text,
         headerTitleStyle: { fontFamily: fonts.serif, color: c.text },
+        headerTitleAllowFontScaling: false,
+        tabBarAllowFontScaling: false,
         headerRight: () => <Who />,
         tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line },
         tabBarActiveTintColor: c.present,

@@ -50,8 +50,10 @@ function Shell() {
       >
         <Stack.Protected guard={status === 'signedIn'}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="world/[id]" options={{ title: 'World' }} />
-          <Stack.Screen name="run/[id]" options={{ title: 'Path timeline' }} />
+          {/* These two screens have horizontal scrubbers. iOS 26+ pops a screen on a rightward pan that starts
+           * anywhere, which would take the drag away from the scrubber, so back stays an edge swipe here. */}
+          <Stack.Screen name="world/[id]" options={{ title: 'World', fullScreenGestureEnabled: false }} />
+          <Stack.Screen name="run/[id]" options={{ title: 'Path timeline', fullScreenGestureEnabled: false }} />
           <Stack.Screen name="compare/[a]/[b]" options={{ title: 'Where two futures part' }} />
           <Stack.Screen name="new" options={{ title: 'New question', presentation: 'modal' }} />
         </Stack.Protected>

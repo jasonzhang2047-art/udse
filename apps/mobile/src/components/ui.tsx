@@ -1,5 +1,6 @@
-/* Small UI kit. All text scales with the OS font size (Dynamic Type / browser zoom): nothing sets
- * allowFontScaling={false} and text containers never have fixed heights. */
+/* Small UI kit. All screen text scales with the OS font size (Dynamic Type / browser zoom): nothing here
+ * sets allowFontScaling={false} and text containers never have fixed heights. Only the tab bar and tab
+ * headers stay fixed, like iOS's own bars (app/(tabs)/_layout.tsx). */
 
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
@@ -28,6 +29,11 @@ import type { Tier } from '@/lib/types';
 /* ------------------------------------------------------------------ text */
 type Variant = 'display' | 'h1' | 'h2' | 'h3' | 'body' | 'lede' | 'small' | 'tiny' | 'eyebrow' | 'mono';
 
+/* React Native scales every size by the body text's multiplier (about 3.1x at the largest accessibility
+ * size), which left the display headline one word per line. iOS grows titles less, e.g. Title 1 goes from
+ * 28pt to 58pt, so headings follow that curve. Body text is never capped. */
+const MAX_SCALE: Partial<Record<Variant, number>> = { display: 2, h1: 2.3, h2: 2.75 };
+
 export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Variant; color?: string }) {
   const { c } = useTheme();
   const base: Record<Variant, TextStyle> = {
@@ -42,7 +48,7 @@ export function T({ v = 'body', color, style, ...rest }: TextProps & { v?: Varia
     eyebrow: { fontFamily: fonts.sans, fontSize: 11.5, lineHeight: 16, letterSpacing: 1.1, textTransform: 'uppercase', fontWeight: '600', color: c.muted },
     mono: { fontFamily: fonts.mono, fontSize: 12, lineHeight: 17, color: c.muted },
   };
-  return <Text {...rest} style={[base[v], color ? { color } : null, style]} />;
+  return <Text maxFontSizeMultiplier={MAX_SCALE[v]} {...rest} style={[base[v], color ? { color } : null, style]} />;
 }
 
 /* ------------------------------------------------------------------ layout */
@@ -73,7 +79,13 @@ export function Screen({
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: c.bg }}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14 + (safeTop ? insets.top : 0), paddingBottom: padBottom ? 40 + insets.bottom : 16 }}
+      // Side insets matter in landscape and on phones whose sensor housing sits on a side edge.
+      contentContainerStyle={{
+        paddingLeft: 16 + insets.left,
+        paddingRight: 16 + insets.right,
+        paddingTop: 14 + (safeTop ? insets.top : 0),
+        paddingBottom: padBottom ? 40 + insets.bottom : 16,
+      }}
       refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={c.present} /> : undefined}
       keyboardShouldPersistTaps="handled"
       scrollEnabled={!locked}
@@ -147,7 +159,9 @@ export function Pill({ children, tone = 'default', color, style }: { children: R
         {
           borderWidth: 1,
           borderColor: tone === 'default' && !color ? c.line2 : ink + '88',
-          borderRadius: 999,
+          // Half a one-line pill's height rather than 999: the same capsule normally, but when large text
+          // wraps it becomes a rounded rectangle instead of a stadium whose ends cut into the text.
+          borderRadius: 12,
           paddingHorizontal: 9,
           paddingVertical: 2,
           alignSelf: 'flex-start',
@@ -222,7 +236,10 @@ export function Avatar({ name, index, size = 26 }: { name: string; index: number
         borderColor: c.bg,
       }}
     >
-      <Text style={{ color: '#151515', fontSize: size * 0.38, fontWeight: '700', fontFamily: fonts.sans }}>{initials(name)}</Text>
+      {/* Initials are part of a fixed-size badge; the full name is in the accessibility label. */}
+      <Text allowFontScaling={false} style={{ color: '#151515', fontSize: size * 0.38, fontWeight: '700', fontFamily: fonts.sans }}>
+        {initials(name)}
+      </Text>
     </View>
   );
 }
@@ -264,7 +281,7 @@ export function Button({
           backgroundColor: bg,
           borderWidth: 1,
           borderColor: kind === 'primary' ? c.accent : c.line2,
-          borderRadius: 999,
+          borderRadius: 22, // capsule at one line (see Pill)
           paddingHorizontal: small ? 12 : 16,
           paddingVertical: small ? 6 : 10,
           minHeight: small ? 34 : 44,
@@ -477,6 +494,8 @@ export function Sheet({ visible, onClose, title, children }: { visible: boolean;
             borderWidth: 1,
             borderColor: c.line,
             paddingBottom: insets.bottom,
+            paddingLeft: insets.left,
+            paddingRight: insets.right,
           }}
         >
           <Row between style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 6 }} wrap={false}>
